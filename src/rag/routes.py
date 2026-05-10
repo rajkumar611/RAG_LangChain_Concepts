@@ -1,6 +1,8 @@
-import io, json, re
+import io, json, os, re
 import numpy as np
 import networkx as nx
+
+os.environ.setdefault("HF_HUB_DISABLE_IMPLICIT_TOKEN", "1")
 from fastapi import APIRouter, UploadFile, File
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -25,6 +27,12 @@ CLAUDE   = "claude-sonnet-4-6"
 
 class Q(BaseModel):
     query: str
+
+class EvalReq(BaseModel):
+    question: str
+    answer: str
+    contexts: list[str]
+    ground_truth: str = ""
 
 def rebuild_indexes(docs: list[str]):
     global DOCS, DOC_EMBS, TFIDF_MAT
@@ -323,3 +331,113 @@ def graph_rag(q: Q):
     steps.append({"step": "4. Generate", "detail": "Answer enriched via multi-hop graph traversal"})
     return {"answer": ans, "docs": docs, "steps": steps,
             "graph_edges": edges[:20], "visited_nodes": list(visited)}
+
+
+# ════════════════════════════════════════════════════════════════════════════════
+# 6 · RAG EVALUATION  (LLM-as-Judge)
+# ════════════════════════════════════════════════════════════════════════════════
+@router.post("/rag/evaluate")
+def rag_evaluate(req: EvalReq):
+    ctx_block = "\n".join(f"[{i+1}] {c}" for i, c in enumerate(req.contexts))
+
+    faithfulness_prompt = f"""You are an expert RAG evaluator. Score the FAITHFULNESS of the answer.
+
+FAITHFULNESS: Does the answer contain ONLY information that is present in the retrieved context?
+Penalise any claim not supported by the context (hallucination).
+
+Retrieved Context:
+{ctx_block}
+
+Answer:
+{req.answer}
+
+Return a JSON object with exactly these keys:
+- score: float between 0.0 and 1.0
+- reasoning: one sentence explanation
+- unsupported_claims: list of any claims not found in context (empty list if none)
+
+JSON only, no extra text."""
+
+    relevancy_prompt = f"""You are an expert RAG evaluator. Score the ANSWER RELEVANCY.
+
+ANSWER RELEVANCY: Does the answer directly address what the question is asking?
+A high score means the answer is on-topic and complete. Penalise off-topic or incomplete answers.
+
+Question: {req.question}
+Answer: {req.answer}
+
+Return a JSON object with exactly these keys:
+- score: float between 0.0 and 1.0
+- reasoning: one sentence explanation
+
+JSON only, no extra text."""
+
+    context_prompt = f"""You are an expert RAG evaluator. Score the CONTEXT UTILIZATION.
+
+CONTEXT UTILIZATION: Did the retrieved context actually contain the information needed to answer the question?
+A high score means the context was relevant and sufficient. A low score means the wrong chunks were retrieved.
+
+Question: {req.question}
+
+Retrieved Context:
+{ctx_block}
+
+Return a JSON object with exactly these keys:
+- score: float between 0.0 and 1.0
+- reasoning: one sentence explanation
+- missing_information: what key information was absent from the context (empty string if nothing missing)
+
+JSON only, no extra text."""
+
+    def parse_score(raw: str) -> dict:
+        try:
+            m = re.search(r'\{.*\}', raw, re.DOTALL)
+            return json.loads(m.group()) if m else {"score": 0.0, "reasoning": "Parse error"}
+        except Exception:
+            return {"score": 0.0, "reasoning": "Parse error"}
+
+    faithfulness   = parse_score(llm(faithfulness_prompt, max_tokens=300))
+    relevancy      = parse_score(llm(relevancy_prompt, max_tokens=200))
+    context_util   = parse_score(llm(context_prompt, max_tokens=200))
+
+    scores = {
+        "faithfulness":        round(faithfulness.get("score", 0.0), 3),
+        "answer_relevancy":    round(relevancy.get("score", 0.0), 3),
+        "context_utilization": round(context_util.get("score", 0.0), 3),
+    }
+
+    if req.ground_truth:
+        correctness_prompt = f"""You are an expert RAG evaluator. Score the CORRECTNESS of the answer.
+
+CORRECTNESS: Compare the generated answer to the ground truth.
+Score 1.0 if fully correct, 0.5 if partially correct, 0.0 if wrong.
+
+Question: {req.question}
+Ground Truth: {req.ground_truth}
+Generated Answer: {req.answer}
+
+Return a JSON object with exactly these keys:
+- score: float between 0.0 and 1.0
+- reasoning: one sentence explanation
+
+JSON only, no extra text."""
+        correctness = parse_score(llm(correctness_prompt, max_tokens=200))
+        scores["correctness"] = round(correctness.get("score", 0.0), 3)
+
+    overall = round(sum(scores.values()) / len(scores), 3)
+
+    return {
+        "scores": scores,
+        "overall": overall,
+        "details": {
+            "faithfulness":        faithfulness,
+            "answer_relevancy":    relevancy,
+            "context_utilization": context_util,
+        },
+        "inputs": {
+            "question":      req.question,
+            "answer":        req.answer,
+            "context_count": len(req.contexts),
+            "has_ground_truth": bool(req.ground_truth),
+        },
+    }

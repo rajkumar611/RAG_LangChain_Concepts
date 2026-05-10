@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>AI Learning Hub</title>
+<title>RAG Evaluation Platform</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233b82f6' stroke-width='2'%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3Cpath d='M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83'/%3E%3C/svg%3E">
 <style>
 :root {
@@ -269,7 +269,7 @@ main { padding: 0 20px 16px; flex: 1; overflow: hidden; }
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2">
     <circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
   </svg>
-  <span style="font-size:15px;font-weight:700;letter-spacing:-0.2px">AI Learning Hub</span>
+  <span style="font-size:15px;font-weight:700;letter-spacing:-0.2px">RAG Evaluation Platform</span>
 </header>
 
 <div class="app-body">
@@ -277,25 +277,22 @@ main { padding: 0 20px 16px; flex: 1; overflow: hidden; }
 <!-- ══ SIDEBAR ══ -->
 <aside class="sidebar">
   <div class="sidebar-logo">
-    <div class="sidebar-logo-text">Table of Contents</div>
+    <div class="sidebar-logo-text">Navigation</div>
   </div>
 
   <div class="sidebar-section-label">Retrieval</div>
   <button class="toc-link" id="toc-rag" onclick="showRAG()">
-    <span class="toc-dot"></span> What is RAG?
+    <span class="toc-dot"></span> RAG Strategies
+  </button>
+  <button class="toc-link" id="toc-eval" onclick="showEval()">
+    <span class="toc-dot"></span> RAG Evaluation
   </button>
 
   <div class="sidebar-section-label">Frameworks</div>
   <button class="toc-link" id="toc-langchain" onclick="showLangchain()">
-    <span class="toc-dot"></span> What is LangChain?
+    <span class="toc-dot"></span> LangChain Orchestration
   </button>
 
-  <div class="sidebar-section-label" style="margin-top:20px">Coming Soon</div>
-  <div class="toc-coming">Vector Databases</div>
-  <div class="toc-coming">Embeddings</div>
-  <div class="toc-coming">AI Agents</div>
-  <div class="toc-coming">Fine-tuning</div>
-  <div class="toc-coming">Prompt Engineering</div>
 </aside>
 
 <div class="page-content">
@@ -420,6 +417,67 @@ main { padding: 0 20px 16px; flex: 1; overflow: hidden; }
   <nav id="tabBar"></nav>
   <!-- Panels -->
   <main id="main"></main>
+</div>
+
+<!-- ══ RAG EVALUATION PAGE ══ -->
+<div id="evalPage" style="display:none;flex-direction:column;flex:1;overflow:hidden">
+  <div style="flex:1;overflow-y:auto;padding:24px 32px;max-width:900px;margin:0 auto;width:100%">
+
+    <div style="margin-bottom:24px">
+      <h2 style="font-size:22px;font-weight:700;color:var(--text);margin:0 0 8px">RAG Evaluation — LLM as Judge</h2>
+      <p style="color:var(--muted);font-size:13px;line-height:1.7;margin:0">
+        Evaluate the quality of any RAG output across three RAGAS-aligned metrics using Claude as an evaluator.
+        Paste in a question, the generated answer, and the retrieved context chunks that were used.
+        Optionally provide a ground truth answer to also score <strong>Correctness</strong>.
+      </p>
+    </div>
+
+    <div style="display:grid;gap:14px;margin-bottom:20px">
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:6px">Question</label>
+        <input id="ev-question" placeholder="e.g. What is Retrieval Augmented Generation?"
+          style="width:100%;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;box-sizing:border-box" />
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:6px">Generated Answer</label>
+        <textarea id="ev-answer" rows="3" placeholder="Paste the answer your RAG pipeline produced..."
+          style="width:100%;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;resize:vertical;box-sizing:border-box"></textarea>
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:6px">Retrieved Context Chunks (one per line)</label>
+        <textarea id="ev-contexts" rows="5" placeholder="Paste each retrieved context chunk on a new line..."
+          style="width:100%;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;resize:vertical;box-sizing:border-box"></textarea>
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:6px">Ground Truth Answer <span style="font-weight:400;color:var(--muted)">(optional — enables Correctness score)</span></label>
+        <input id="ev-groundtruth" placeholder="The ideal correct answer (leave blank to skip)"
+          style="width:100%;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;box-sizing:border-box" />
+      </div>
+    </div>
+
+    <button onclick="runEval()" style="background:var(--blue);color:#fff;border:none;border-radius:8px;padding:10px 24px;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:24px">
+      Run Evaluation
+    </button>
+
+    <div id="eval-result" style="display:none">
+      <!-- scores injected here -->
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:24px">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px">
+        <div style="font-size:11px;font-weight:700;color:var(--blue);text-transform:uppercase;margin-bottom:6px">Faithfulness</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.6">Is the answer grounded in the retrieved context? Penalises hallucinations — any claim not found in the chunks.</div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px">
+        <div style="font-size:11px;font-weight:700;color:var(--purple);text-transform:uppercase;margin-bottom:6px">Answer Relevancy</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.6">Does the answer actually address the question? High score = on-topic and complete. Low score = off-topic or evasive.</div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px">
+        <div style="font-size:11px;font-weight:700;color:var(--green);text-transform:uppercase;margin-bottom:6px">Context Utilization</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.6">Did the retrieved chunks contain what was needed? Low score = retrieval failure — wrong chunks were fetched.</div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- ══ LANGCHAIN PAGE ══ -->
@@ -677,7 +735,7 @@ main { padding: 0 20px 16px; flex: 1; overflow: hidden; }
 </div><!-- end app-body -->
 
 <script>
-const BASE = "http://localhost:8000";
+const BASE = "http://localhost:8080";
 
 function toggleSidebar() {
   document.querySelector(".sidebar").classList.toggle("collapsed");
@@ -692,6 +750,7 @@ function setActiveToc(id) {
 function hidePanels() {
   document.getElementById("welcomePage").style.display = "none";
   document.getElementById("ragPage").style.display = "none";
+  document.getElementById("evalPage").style.display = "none";
   document.getElementById("langchainPage").style.display = "none";
 }
 
@@ -699,6 +758,69 @@ function showRAG() {
   hidePanels();
   document.getElementById("ragPage").style.display = "flex";
   setActiveToc("toc-rag");
+}
+
+function showEval() {
+  hidePanels();
+  document.getElementById("evalPage").style.display = "flex";
+  setActiveToc("toc-eval");
+}
+
+async function runEval() {
+  const question    = document.getElementById('ev-question').value.trim();
+  const answer      = document.getElementById('ev-answer').value.trim();
+  const ctxRaw      = document.getElementById('ev-contexts').value.trim();
+  const groundTruth = document.getElementById('ev-groundtruth').value.trim();
+  if (!question || !answer || !ctxRaw) { alert('Question, Answer, and Contexts are required.'); return; }
+  const contexts = ctxRaw.split('\n').map(l => l.trim()).filter(Boolean);
+  const resultEl = document.getElementById('eval-result');
+  resultEl.style.display = 'block';
+  resultEl.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:16px 0">Evaluating with Claude as judge…</div>';
+  try {
+    const resp = await fetch(`${BASE}/rag/evaluate`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({question, answer, contexts, ground_truth: groundTruth}),
+    });
+    const data = await resp.json();
+    const scoreColor = s => s >= 0.8 ? 'var(--green)' : s >= 0.5 ? 'var(--amber)' : 'var(--red)';
+    const scoreBar = s => {
+      const pct = Math.round(s * 100);
+      return `<div style="background:var(--bg);border-radius:4px;height:6px;width:100%;margin-top:4px">
+        <div style="height:6px;border-radius:4px;background:${scoreColor(s)};width:${pct}%"></div>
+      </div>`;
+    };
+    const metricCard = (label, color, key) => {
+      const s = data.scores[key] ?? 0;
+      const d = data.details[key] ?? {};
+      return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px">
+        <div style="font-size:11px;font-weight:700;color:${color};text-transform:uppercase;margin-bottom:4px">${label}</div>
+        <div style="font-size:22px;font-weight:800;color:${scoreColor(s)}">${(s * 100).toFixed(0)}<span style="font-size:13px;font-weight:400">%</span></div>
+        ${scoreBar(s)}
+        <div style="font-size:11px;color:var(--muted);margin-top:8px;line-height:1.5">${esc(d.reasoning || '')}</div>
+      </div>`;
+    };
+    const overall = data.overall ?? 0;
+    resultEl.innerHTML = `
+      <div style="background:var(--surface);border:1px solid ${scoreColor(overall)};border-radius:12px;padding:16px 20px;margin-bottom:16px;display:flex;align-items:center;gap:16px">
+        <div>
+          <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase">Overall Score</div>
+          <div style="font-size:32px;font-weight:800;color:${scoreColor(overall)}">${(overall * 100).toFixed(0)}%</div>
+        </div>
+        <div style="flex:1;font-size:12px;color:var(--muted);line-height:1.7">
+          Based on ${Object.keys(data.scores).length} metrics across ${data.inputs.context_count} context chunk(s).
+          ${data.inputs.has_ground_truth ? 'Correctness scored against provided ground truth.' : ''}
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+        ${metricCard('Faithfulness','var(--blue)','faithfulness')}
+        ${metricCard('Answer Relevancy','var(--purple)','answer_relevancy')}
+        ${metricCard('Context Utilization','var(--green)','context_utilization')}
+        ${data.scores.correctness !== undefined ? metricCard('Correctness','var(--amber)','correctness') : ''}
+      </div>
+    `;
+  } catch(e) {
+    resultEl.innerHTML = `<div style="color:var(--red);font-size:13px">Error: ${e.message}</div>`;
+  }
 }
 
 function showLangchain() {
@@ -721,7 +843,7 @@ const PATTERNS = [
       {t:"Embed Query",blue:true},{a:true},{t:"Vector Search",blue:true},{a:true},
       {t:"Augment Prompt",green:true},{a:true},{t:"Generate",amber:true},
     ],
-    samples: [],
+    samples: ["What is the main topic of this document?","Summarise the key points","What conclusions are drawn?"],
     endpoint: "/rag/naive",
   },
   {
@@ -735,7 +857,7 @@ const PATTERNS = [
       {t:"Rewrite",purple:true},{a:true},{t:"Hybrid Search",blue:true},{a:true},
       {t:"RRF Fusion",blue:true},{a:true},{t:"Re-rank",red:true},{a:true},{t:"Generate",amber:true},
     ],
-    samples: [],
+    samples: ["Compare the different approaches mentioned","What are the technical details explained?","How does this relate to industry best practices?"],
     endpoint: "/rag/advanced",
   },
   {
@@ -748,7 +870,7 @@ const PATTERNS = [
       {t:"Agent Thinks",red:true},{a:true},{t:"search()",blue:true},{a:true},
       {t:"Agent Thinks",red:true},{a:true},{t:"repeat / stop",amber:true},{a:true},{t:"Answer",green:true},
     ],
-    samples: [],
+    samples: ["What are all the risks mentioned and how are they addressed?","Find every recommendation made and explain why","What problem is being solved and what is the proposed solution?"],
     endpoint: "/rag/agentic",
   },
   {
@@ -762,7 +884,7 @@ const PATTERNS = [
       {t:"Dense (Vector)",blue:true},{a:true},{t:"Sparse (BM25)",amber:true},{a:true},
       {t:"RRF Fusion",green:true},{a:true},{t:"Generate",amber:true},
     ],
-    samples: [],
+    samples: ["What specific metrics or numbers are mentioned?","Explain the methodology used","What are the key definitions in this document?"],
     endpoint: "/rag/hybrid",
     showSources: true,
   },
@@ -776,7 +898,7 @@ const PATTERNS = [
       {t:"Seed Search",blue:true},{a:true},{t:"Graph Hop 1",amber:true},{a:true},
       {t:"Graph Hop 2",amber:true},{a:true},{t:"Re-score",purple:true},{a:true},{t:"Generate",green:true},
     ],
-    samples: [],
+    samples: ["How are the main concepts connected to each other?","What leads to the outcomes described?","Trace the relationship between the problem and the solution"],
     endpoint: "/rag/graph",
     showGraph: true,
   },
@@ -818,7 +940,7 @@ PATTERNS.forEach((p, idx) => {
 
     <div class="right-col">
       <div class="card query-area">
-        <div class="card-title">Try it</div>
+        <div class="card-title">Query</div>
         <textarea id="q-${p.id}" rows="3" placeholder="Upload a document, then ask a question…"></textarea>
         <div class="samples">
           ${p.samples.map(s=>`<button class="sample-btn" onclick="setSample('${p.id}','${s.replace(/'/g,"\\'")}')">${s}</button>`).join("")}
@@ -1678,7 +1800,7 @@ const _lcRunners = {
     const role = document.getElementById('lc1-role').value;
     const q    = document.getElementById('lc1-q').value.trim();
     if (!q) throw new Error('Enter a question.');
-    const data = await lcPost('/lc/prompt', {role, question: q});
+    const data = await lcPost('/langchain/prompt', {role, question: q});
     document.getElementById('lc-right').innerHTML = `
       ${lcCard('Template', lcPre('ChatPromptTemplate.from_messages([\n  ("system", "You are a {role}. Answer in under 2 sentences."),\n  ("human", "{question}"),\n])'))}
       ${lcCard('Rendered Prompt', lcPre(data.rendered))}
@@ -1690,7 +1812,7 @@ const _lcRunners = {
   2: async () => {
     const text = document.getElementById('lc2-text').value.trim();
     if (!text) throw new Error('Enter some text.');
-    const data = await lcPost('/lc/chaining', {text});
+    const data = await lcPost('/langchain/chaining', {text});
     const colors = ['var(--blue)', 'var(--purple)', 'var(--green)'];
     document.getElementById('lc-right').innerHTML = data.steps.map((s, i) =>
       lcCard(s.label, `<div style="font-size:13px;line-height:1.7;color:var(--text)">${esc(s.output)}</div>`, colors[i])
@@ -1701,7 +1823,7 @@ const _lcRunners = {
   3: async () => {
     const q = document.getElementById('lc3-q').value.trim();
     if (!q) throw new Error('Enter a question.');
-    const data = await lcPost('/lc/rag', {question: q});
+    const data = await lcPost('/langchain/rag', {question: q});
     document.getElementById('lc-right').innerHTML = `
       ${lcCard('Retrieved Chunks (FAISS top-2)', data.chunks.map((c,i)=>`
         <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:8px;display:flex;gap:10px">
@@ -1716,7 +1838,7 @@ const _lcRunners = {
   4: async () => {
     const msg = document.getElementById('lc4-msg').value.trim();
     if (!msg) throw new Error('Type a message.');
-    const data = await lcPost('/lc/memory', {message: msg, session_id: _getLCSession()});
+    const data = await lcPost('/langchain/memory', {message: msg, session_id: _getLCSession()});
     document.getElementById('lc4-msg').value = '';
     const chatHtml = data.history.map(m => {
       const isUser = m.role === 'user';
@@ -1733,7 +1855,7 @@ const _lcRunners = {
   5: async () => {
     const q = document.getElementById('lc5-q').value.trim();
     if (!q) throw new Error('Enter a question.');
-    const data = await lcPost('/lc/tools', {question: q});
+    const data = await lcPost('/langchain/tools', {question: q});
     const toolsHtml = data.tool_calls.length
       ? data.tool_calls.map(tc => `
           <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:8px">
@@ -1755,7 +1877,7 @@ const _lcRunners = {
   6: async () => {
     const text = document.getElementById('lc6-text').value.trim();
     if (!text) throw new Error('Enter some text.');
-    const data = await lcPost('/lc/documents', {text});
+    const data = await lcPost('/langchain/documents', {text});
     function chunksHtml(arr) {
       return arr.map(c => `
         <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 12px;margin-bottom:6px">
@@ -1778,7 +1900,7 @@ const _lcRunners = {
   7: async () => {
     const topic = document.getElementById('lc7-topic').value.trim();
     if (!topic) throw new Error('Enter a topic.');
-    const data = await lcPost('/lc/parsers', {topic});
+    const data = await lcPost('/langchain/parsers', {topic});
     const listHtml = (data.list_output || []).map(i=>`<div style="display:flex;gap:6px;align-items:center;margin-bottom:4px"><span style="color:var(--blue)">•</span><span style="font-size:13px;color:var(--text)">${esc(i.trim())}</span></div>`).join('');
     const jsonStr  = JSON.stringify(data.json_output, null, 2);
     document.getElementById('lc-right').innerHTML = `
@@ -1792,7 +1914,7 @@ const _lcRunners = {
   8: async () => {
     const q = document.getElementById('lc8-q').value.trim();
     if (!q) throw new Error('Enter a question.');
-    const data = await lcPost('/lc/agent', {question: q});
+    const data = await lcPost('/langchain/agent', {question: q});
     const stepsHtml = (data.steps || []).map((s, i) => `
       <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:8px">
         <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">
@@ -1814,7 +1936,7 @@ const _lcRunners = {
   9: async () => {
     const topic = document.getElementById('lc9-topic').value.trim();
     if (!topic) throw new Error('Enter a topic.');
-    const data = await lcPost('/lc/multiagent', {topic});
+    const data = await lcPost('/langchain/multiagent', {topic});
     document.getElementById('lc-right').innerHTML = `
       ${lcCard('Research Agent — bullet facts', `<div style="font-size:13px;line-height:1.9;color:var(--text);white-space:pre-wrap">${esc(data.research)}</div>`, 'var(--blue)')}
       ${lcCard('Writer Agent — blog post', `<div style="font-size:13px;line-height:1.9;color:var(--text)">${esc(data.blog)}</div>`, 'var(--green)')}
@@ -1825,7 +1947,7 @@ const _lcRunners = {
   10: async () => {
     const topic = document.getElementById('lc10-topic').value.trim();
     if (!topic) throw new Error('Enter a topic.');
-    const data = await lcPost('/lc/langgraph', {topic});
+    const data = await lcPost('/langchain/langgraph', {topic});
     const nodeColors = {Manager:'var(--blue)',Research:'var(--blue)','Research Agent':'var(--blue)',Writer:'var(--green)','Writer Agent':'var(--green)',Reviewer:'var(--amber)','Reviewer Agent':'var(--amber)'};
     const statusIcon = {ok:'✓', approved:'✅', revise:'↩'};
     const logHtml = (data.log || []).map(l => {
@@ -3112,7 +3234,7 @@ async function lcCopyCode() {
 
 async function lcMemoryClear() {
   const sid = _getLCSession();
-  await fetch(`${BASE}/lc/memory/${sid}`, {method:'DELETE'}).catch(()=>{});
+  await fetch(`${BASE}/langchain/memory/${sid}`, {method:'DELETE'}).catch(()=>{});
   _lcSession = null;
   document.getElementById('lc-right').innerHTML = `<div class="card"><div style="color:var(--green);font-size:13px">Session cleared. Start a new conversation.</div></div>`;
 }

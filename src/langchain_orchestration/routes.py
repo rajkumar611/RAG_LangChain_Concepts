@@ -25,7 +25,7 @@ class LCMemReq(BaseModel):
 
 
 # ── 1. Prompt Management ──────────────────────────────────────────────────────
-@router.post("/lc/prompt")
+@router.post("/langchain/prompt")
 def lc_prompt(req: LCPromptReq):
     from langchain_anthropic import ChatAnthropic
     from langchain_core.prompts import ChatPromptTemplate
@@ -43,7 +43,7 @@ def lc_prompt(req: LCPromptReq):
 
 
 # ── 2. LLM Chaining ──────────────────────────────────────────────────────────
-@router.post("/lc/chaining")
+@router.post("/langchain/chaining")
 def lc_chaining(req: LCTextReq):
     from langchain_anthropic import ChatAnthropic
     from langchain_core.prompts import ChatPromptTemplate
@@ -84,7 +84,7 @@ def _get_lc_vs():
     _lc_vectorstore = FAISS.from_documents(docs, emb)
     return _lc_vectorstore
 
-@router.post("/lc/rag")
+@router.post("/langchain/rag")
 def lc_rag(req: LCQReq):
     from langchain_anthropic import ChatAnthropic
     from langchain_core.prompts import ChatPromptTemplate
@@ -100,7 +100,7 @@ def lc_rag(req: LCQReq):
 
 
 # ── 4. Memory ─────────────────────────────────────────────────────────────────
-@router.post("/lc/memory")
+@router.post("/langchain/memory")
 def lc_memory(req: LCMemReq):
     from langchain_anthropic import ChatAnthropic
     from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
@@ -124,14 +124,14 @@ def lc_memory(req: LCMemReq):
                     for m in history],
     }
 
-@router.delete("/lc/memory/{session_id}")
+@router.delete("/langchain/memory/{session_id}")
 def lc_memory_clear(session_id: str):
     LC_SESSIONS.pop(session_id, None)
     return {"cleared": True}
 
 
 # ── 5. Tools & Function Calling ───────────────────────────────────────────────
-@router.post("/lc/tools")
+@router.post("/langchain/tools")
 def lc_tools(req: LCQReq):
     from langchain_anthropic import ChatAnthropic
     from langchain_core.tools import tool
@@ -190,7 +190,7 @@ def lc_tools(req: LCQReq):
 
 
 # ── 6. Document Processing ────────────────────────────────────────────────────
-@router.post("/lc/documents")
+@router.post("/langchain/documents")
 def lc_documents(req: LCTextReq):
     from langchain_text_splitters import CharacterTextSplitter, RecursiveCharacterTextSplitter
     from langchain_core.documents import Document
@@ -207,7 +207,7 @@ def lc_documents(req: LCTextReq):
 
 
 # ── 7. Output Parsers ─────────────────────────────────────────────────────────
-@router.post("/lc/parsers")
+@router.post("/langchain/parsers")
 def lc_parsers(req: LCTopicReq):
     from langchain_anthropic import ChatAnthropic
     from langchain_core.prompts import ChatPromptTemplate
@@ -227,7 +227,7 @@ def lc_parsers(req: LCTopicReq):
 
 
 # ── 8. Single Agent ───────────────────────────────────────────────────────────
-@router.post("/lc/agent")
+@router.post("/langchain/agent")
 def lc_agent_ep(req: LCQReq):
     from langchain_anthropic import ChatAnthropic
     from langchain_core.tools import tool
@@ -276,7 +276,7 @@ def lc_agent_ep(req: LCQReq):
 
 
 # ── 9. Multi-Agent Simple ─────────────────────────────────────────────────────
-@router.post("/lc/multiagent")
+@router.post("/langchain/multiagent")
 def lc_multiagent(req: LCTopicReq):
     from langchain_anthropic import ChatAnthropic
     from langchain_core.messages import SystemMessage, HumanMessage
@@ -296,7 +296,7 @@ def lc_multiagent(req: LCTopicReq):
 
 
 # ── 10. LangGraph Multi-Agent ─────────────────────────────────────────────────
-@router.post("/lc/langgraph")
+@router.post("/langchain/langgraph")
 def lc_langgraph(req: LCTopicReq):
     from langchain_anthropic import ChatAnthropic
     from langchain_core.prompts import ChatPromptTemplate
