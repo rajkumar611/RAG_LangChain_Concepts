@@ -1,13 +1,22 @@
+import os
+
 from fastapi import APIRouter
 from pydantic import BaseModel
 
 router = APIRouter()
 
+# ── Config ────────────────────────────────────────────────────────────────────
+LC_MODEL  = os.getenv("HAIKU_MODEL", "claude-haiku-4-5-20251001")
+EMB_MODEL = os.getenv("EMBEDDING_MODEL", "all-MiniLM-L6-v2")
+
+# ── Session state (cleared on server restart) ─────────────────────────────────
 LC_SESSIONS: dict[str, list] = {}
 _lc_vectorstore = None
 
+
+# ── Request models ────────────────────────────────────────────────────────────
 class LCPromptReq(BaseModel):
-    role: str
+    role:     str
     question: str
 
 class LCTextReq(BaseModel):
@@ -20,7 +29,7 @@ class LCTopicReq(BaseModel):
     topic: str
 
 class LCMemReq(BaseModel):
-    message: str
+    message:    str
     session_id: str
 
 
@@ -30,15 +39,16 @@ def lc_prompt(req: LCPromptReq):
     from langchain_anthropic import ChatAnthropic
     from langchain_core.prompts import ChatPromptTemplate
     from langchain_core.output_parsers import StrOutputParser
-    lc = ChatAnthropic(model="claude-haiku-4-5-20251001", max_tokens=256)
+
+    lc       = ChatAnthropic(model=LC_MODEL, max_tokens=256)
     template = ChatPromptTemplate.from_messages([
         ("system", "You are a {role}. Answer in under 2 sentences."),
-        ("human", "{question}"),
+        ("human",  "{question}"),
     ])
     answer = (template | lc | StrOutputParser()).invoke({"role": req.role, "question": req.question})
     return {
         "rendered": f"[system] You are a {req.role}. Answer in under 2 sentences.\n[human] {req.question}",
-        "answer": answer,
+        "answer":   answer,
     }
 
 
@@ -48,14 +58,17 @@ def lc_chaining(req: LCTextReq):
     from langchain_anthropic import ChatAnthropic
     from langchain_core.prompts import ChatPromptTemplate
     from langchain_core.output_parsers import StrOutputParser
-    lc = ChatAnthropic(model="claude-haiku-4-5-20251001", max_tokens=256)
+
+    lc = ChatAnthropic(model=LC_MODEL, max_tokens=256)
     p  = StrOutputParser()
+
     step1 = (ChatPromptTemplate.from_template(
         "Translate to English. Return ONLY the translation.\n\n{text}") | lc | p).invoke({"text": req.text})
     step2 = (ChatPromptTemplate.from_template(
         "Summarise in exactly one sentence:\n\n{t}") | lc | p).invoke({"t": step1})
     step3 = (ChatPromptTemplate.from_template(
         'Wrap in JSON: {{"summary": "..."}}\nSummary: {s}') | lc | p).invoke({"s": step2})
+
     return {"steps": [
         {"label": "1 · Translate", "output": step1},
         {"label": "2 · Summarise", "output": step2},
@@ -65,12 +78,15 @@ def lc_chaining(req: LCTextReq):
 
 # ── 3. RAG (fixed knowledge base) ────────────────────────────────────────────
 def _get_lc_vs():
+    """Lazy-load a small fixed FAISS vectorstore with 7 AI/ML facts."""
     global _lc_vectorstore
     if _lc_vectorstore:
         return _lc_vectorstore
+
     from langchain_community.embeddings import HuggingFaceEmbeddings
     from langchain_community.vectorstores import FAISS
     from langchain_core.documents import Document
+
     docs = [
         Document(page_content="Python is a high-level programming language prized for its readability."),
         Document(page_content="LangChain is a framework for building LLM-powered applications with chains and agents."),
@@ -80,20 +96,22 @@ def _get_lc_vs():
         Document(page_content="Embeddings convert text to numerical vectors that capture semantic meaning."),
         Document(page_content="Chunking splits large documents into smaller pieces before embedding."),
     ]
-    emb = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+    emb = HuggingFaceEmbeddings(model_name=EMB_MODEL)
     _lc_vectorstore = FAISS.from_documents(docs, emb)
     return _lc_vectorstore
+
 
 @router.post("/langchain/rag")
 def lc_rag(req: LCQReq):
     from langchain_anthropic import ChatAnthropic
     from langchain_core.prompts import ChatPromptTemplate
     from langchain_core.output_parsers import StrOutputParser
-    vs       = _get_lc_vs()
-    chunks   = vs.as_retriever(search_kwargs={"k": 2}).invoke(req.question)
-    context  = "\n".join(f"- {d.page_content}" for d in chunks)
-    lc       = ChatAnthropic(model="claude-haiku-4-5-20251001", max_tokens=256)
-    answer   = (ChatPromptTemplate.from_template(
+
+    vs      = _get_lc_vs()
+    chunks  = vs.as_retriever(search_kwargs={"k": 2}).invoke(req.question)
+    context = "\n".join(f"- {d.page_content}" for d in chunks)
+    lc      = ChatAnthropic(model=LC_MODEL, max_tokens=256)
+    answer  = (ChatPromptTemplate.from_template(
         "Use ONLY the context to answer.\n\nContext:\n{ctx}\n\nQuestion: {q}\n\nOne sentence answer:")
         | lc | StrOutputParser()).invoke({"ctx": context, "q": req.question})
     return {"chunks": [d.page_content for d in chunks], "answer": answer}
@@ -106,11 +124,13 @@ def lc_memory(req: LCMemReq):
     from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
     from langchain_core.output_parsers import StrOutputParser
     from langchain_core.messages import HumanMessage, AIMessage
+
     if req.session_id not in LC_SESSIONS:
         LC_SESSIONS[req.session_id] = []
     history = LC_SESSIONS[req.session_id]
-    lc      = ChatAnthropic(model="claude-haiku-4-5-20251001", max_tokens=256)
-    prompt  = ChatPromptTemplate.from_messages([
+
+    lc     = ChatAnthropic(model=LC_MODEL, max_tokens=256)
+    prompt = ChatPromptTemplate.from_messages([
         ("system", "You are a friendly assistant. Remember everything the user tells you."),
         MessagesPlaceholder(variable_name="history"),
         ("human", "{input}"),
@@ -118,10 +138,13 @@ def lc_memory(req: LCMemReq):
     answer = (prompt | lc | StrOutputParser()).invoke({"history": history, "input": req.message})
     history.append(HumanMessage(content=req.message))
     history.append(AIMessage(content=answer))
+
     return {
-        "answer": answer,
-        "history": [{"role": "user" if isinstance(m, HumanMessage) else "bot", "text": m.content}
-                    for m in history],
+        "answer":  answer,
+        "history": [
+            {"role": "user" if isinstance(m, HumanMessage) else "bot", "text": m.content}
+            for m in history
+        ],
     }
 
 @router.delete("/langchain/memory/{session_id}")
@@ -141,14 +164,20 @@ def lc_tools(req: LCQReq):
     @tool
     def calculator(expression: str) -> str:
         """Evaluate a maths expression, e.g. '25 * 4 + 10'."""
-        try:    return str(eval(expression, {"__builtins__": {}}, {}))
-        except Exception as e: return f"Error: {e}"
+        try:
+            return str(eval(expression, {"__builtins__": {}}, {}))
+        except Exception as e:
+            return f"Error: {e}"
 
     @tool
     def get_weather(city: str) -> str:
         """Return current weather for a city (mock data)."""
-        data = {"london": "15°C, Cloudy", "singapore": "32°C, Humid",
-                "new york": "22°C, Sunny", "sydney": "19°C, Partly Cloudy"}
+        data = {
+            "london":    "15°C, Cloudy",
+            "singapore": "32°C, Humid",
+            "new york":  "22°C, Sunny",
+            "sydney":    "19°C, Partly Cloudy",
+        }
         return data.get(city.lower(), "No weather data for that city.")
 
     @tool
@@ -158,11 +187,9 @@ def lc_tools(req: LCQReq):
 
     tools     = [calculator, get_weather, word_count]
     tools_map = {t.name: t for t in tools}
-    lc        = ChatAnthropic(model="claude-haiku-4-5-20251001", max_tokens=512)
+    lc        = ChatAnthropic(model=LC_MODEL, max_tokens=512)
     resp      = lc.bind_tools(tools).invoke(req.question)
-
-    content    = resp.content
-    tool_calls = []
+    content   = resp.content
 
     if isinstance(content, str):
         return {"tool_calls": [], "answer": content}
@@ -170,6 +197,7 @@ def lc_tools(req: LCQReq):
     def _get(block, key):
         return block[key] if isinstance(block, dict) else getattr(block, key, None)
 
+    tool_calls = []
     for block in content:
         if _get(block, "type") == "tool_use":
             name   = _get(block, "name")
@@ -194,9 +222,10 @@ def lc_tools(req: LCQReq):
 def lc_documents(req: LCTextReq):
     from langchain_text_splitters import CharacterTextSplitter, RecursiveCharacterTextSplitter
     from langchain_core.documents import Document
-    doc  = Document(page_content=req.text)
-    cs   = CharacterTextSplitter(chunk_size=200, chunk_overlap=20, separator="\n\n")
-    rs   = RecursiveCharacterTextSplitter(chunk_size=200, chunk_overlap=20)
+
+    doc = Document(page_content=req.text)
+    cs  = CharacterTextSplitter(chunk_size=200, chunk_overlap=20, separator="\n\n")
+    rs  = RecursiveCharacterTextSplitter(chunk_size=200, chunk_overlap=20)
     return {
         "total_chars": len(req.text),
         "char_chunks": [{"i": i+1, "chars": len(c.page_content), "text": c.page_content}
@@ -212,9 +241,11 @@ def lc_parsers(req: LCTopicReq):
     from langchain_anthropic import ChatAnthropic
     from langchain_core.prompts import ChatPromptTemplate
     from langchain_core.output_parsers import StrOutputParser, JsonOutputParser, CommaSeparatedListOutputParser
-    lc  = ChatAnthropic(model="claude-haiku-4-5-20251001", max_tokens=512)
+
+    lc  = ChatAnthropic(model=LC_MODEL, max_tokens=512)
     lp  = CommaSeparatedListOutputParser()
     jp  = JsonOutputParser()
+
     lst = (ChatPromptTemplate.from_template(
         "List five items related to '{t}'. {fi}").partial(fi=lp.get_format_instructions())
         | lc | lp).invoke({"t": req.topic})
@@ -223,6 +254,7 @@ def lc_parsers(req: LCTopicReq):
         .partial(fi=jp.get_format_instructions()) | lc | jp).invoke({"t": req.topic})
     txt = (ChatPromptTemplate.from_template(
         "Write one sentence explaining '{t}'.") | lc | StrOutputParser()).invoke({"t": req.topic})
+
     return {"string_output": txt, "list_output": lst, "json_output": jsn}
 
 
@@ -237,8 +269,10 @@ def lc_agent_ep(req: LCQReq):
     @tool
     def calculator(expression: str) -> str:
         """Evaluate a maths expression, e.g. '100 * 1.35'."""
-        try:    return str(eval(expression, {"__builtins__": {}}, {}))
-        except Exception as e: return f"Error: {e}"
+        try:
+            return str(eval(expression, {"__builtins__": {}}, {}))
+        except Exception as e:
+            return f"Error: {e}"
 
     @tool
     def get_exchange_rate(currency_pair: str) -> str:
@@ -252,14 +286,18 @@ def lc_agent_ep(req: LCQReq):
     @tool
     def get_country_info(country: str) -> str:
         """Return basic facts about a country. Supports: Singapore, India, USA."""
-        info = {"singapore": "City-state in Southeast Asia. Population ~6M. Currency: SGD.",
-                "india": "South Asian country. Population ~1.4B. Currency: INR.",
-                "usa": "North American country. Population ~330M. Currency: USD."}
+        info = {
+            "singapore": "City-state in Southeast Asia. Population ~6M. Currency: SGD.",
+            "india":     "South Asian country. Population ~1.4B. Currency: INR.",
+            "usa":       "North American country. Population ~330M. Currency: USD.",
+        }
         return info.get(country.lower(), "Country info not available.")
 
-    lc     = ChatAnthropic(model="claude-haiku-4-5-20251001", max_tokens=1024)
-    agent  = create_react_agent(lc, [calculator, get_exchange_rate, get_country_info],
-                                prompt="You are a helpful assistant. Use tools when needed. Think step by step.")
+    lc     = ChatAnthropic(model=LC_MODEL, max_tokens=1024)
+    agent  = create_react_agent(
+        lc, [calculator, get_exchange_rate, get_country_info],
+        prompt="You are a helpful assistant. Use tools when needed. Think step by step.",
+    )
     result = agent.invoke({"messages": [{"role": "user", "content": req.question}]})
 
     steps, pending = [], {}
@@ -267,10 +305,9 @@ def lc_agent_ep(req: LCQReq):
         if isinstance(msg, AIMessage) and msg.tool_calls:
             for tc in msg.tool_calls:
                 pending[tc["id"]] = {"tool": tc["name"], "input": tc["args"], "result": ""}
-        elif isinstance(msg, ToolMessage):
-            if msg.tool_call_id in pending:
-                pending[msg.tool_call_id]["result"] = msg.content
-                steps.append(pending.pop(msg.tool_call_id))
+        elif isinstance(msg, ToolMessage) and msg.tool_call_id in pending:
+            pending[msg.tool_call_id]["result"] = msg.content
+            steps.append(pending.pop(msg.tool_call_id))
 
     return {"steps": steps, "answer": result["messages"][-1].content}
 
@@ -280,7 +317,8 @@ def lc_agent_ep(req: LCQReq):
 def lc_multiagent(req: LCTopicReq):
     from langchain_anthropic import ChatAnthropic
     from langchain_core.messages import SystemMessage, HumanMessage
-    lc = ChatAnthropic(model="claude-haiku-4-5-20251001", max_tokens=1024)
+
+    lc = ChatAnthropic(model=LC_MODEL, max_tokens=1024)
 
     research = lc.invoke([
         SystemMessage("You are a research assistant. Given a topic, return 5 concise bullet-point facts."),
@@ -304,13 +342,17 @@ def lc_langgraph(req: LCTopicReq):
     from langgraph.graph import StateGraph, END
     from typing import TypedDict, Literal
 
-    lc = ChatAnthropic(model="claude-haiku-4-5-20251001", max_tokens=512)
-    p  = StrOutputParser()
+    lc  = ChatAnthropic(model=LC_MODEL, max_tokens=512)
+    p   = StrOutputParser()
     log: list[dict] = []
 
     class BlogState(TypedDict):
-        topic: str; research: str; draft: str
-        feedback: str; final: str; revisions: int
+        topic:     str
+        research:  str
+        draft:     str
+        feedback:  str
+        final:     str
+        revisions: int
 
     def manager_node(s: BlogState) -> BlogState:
         log.append({"node": "Manager", "status": "ok",
@@ -332,9 +374,9 @@ def lc_langgraph(req: LCTopicReq):
         return {"draft": out, "revisions": s.get("revisions", 0)}
 
     def reviewer_node(s: BlogState) -> BlogState:
-        review = (ChatPromptTemplate.from_template(
+        review   = (ChatPromptTemplate.from_template(
             "Review this blog. Reply APPROVED or REVISE: <feedback>\n\nDraft:\n{d}") | lc | p
-                  ).invoke({"d": s["draft"]})
+                    ).invoke({"d": s["draft"]})
         approved = review.strip().upper().startswith("APPROVED")
         log.append({"node": "Reviewer Agent",
                     "status": "approved" if approved else "revise",
@@ -344,21 +386,30 @@ def lc_langgraph(req: LCTopicReq):
         return {"feedback": review, "revisions": s.get("revisions", 0) + 1}
 
     def should_revise(s: BlogState) -> Literal["writer", "end"]:
-        if s.get("final") or s.get("revisions", 0) >= 2: return "end"
+        if s.get("final") or s.get("revisions", 0) >= 2:
+            return "end"
         return "writer"
 
     g = StateGraph(BlogState)
-    for name, fn in [("manager", manager_node), ("research", research_node),
-                     ("writer",  writer_node),   ("reviewer", reviewer_node)]:
+    for name, fn in [("manager",  manager_node),
+                     ("research", research_node),
+                     ("writer",   writer_node),
+                     ("reviewer", reviewer_node)]:
         g.add_node(name, fn)
+
     g.set_entry_point("manager")
-    g.add_edge("manager", "research")
+    g.add_edge("manager",  "research")
     g.add_edge("research", "writer")
-    g.add_edge("writer", "reviewer")
+    g.add_edge("writer",   "reviewer")
     g.add_conditional_edges("reviewer", should_revise, {"writer": "writer", "end": END})
     lg_app = g.compile()
 
-    result = lg_app.invoke({"topic": req.topic, "research": "", "draft": "",
-                            "feedback": "", "final": "", "revisions": 0})
-    return {"log": log, "final": result.get("final") or result.get("draft"),
-            "revisions": result.get("revisions", 0)}
+    result = lg_app.invoke({
+        "topic": req.topic, "research": "", "draft": "",
+        "feedback": "", "final": "", "revisions": 0,
+    })
+    return {
+        "log":       log,
+        "final":     result.get("final") or result.get("draft"),
+        "revisions": result.get("revisions", 0),
+    }
