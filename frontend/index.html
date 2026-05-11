@@ -280,6 +280,11 @@ main { padding: 0 20px 16px; flex: 1; overflow: hidden; }
     <div class="sidebar-logo-text">Navigation</div>
   </div>
 
+  <div class="sidebar-section-label">Overview</div>
+  <button class="toc-link active" id="toc-home" onclick="showHome()">
+    <span class="toc-dot"></span> Home
+  </button>
+
   <div class="sidebar-section-label">Retrieval</div>
   <button class="toc-link" id="toc-rag" onclick="showRAG()">
     <span class="toc-dot"></span> RAG Strategies
@@ -298,10 +303,10 @@ main { padding: 0 20px 16px; flex: 1; overflow: hidden; }
 <div class="page-content">
 
 <!-- ══ WELCOME PAGE ══ -->
-<div id="welcomePage" style="flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden">
-  <div style="text-align:center;padding:24px">
-    <!-- Neural Network Brain SVG -->
-    <svg width="260" height="260" viewBox="0 0 260 260" xmlns="http://www.w3.org/2000/svg" style="margin-bottom:16px">
+<div id="welcomePage" style="flex:1;display:flex;flex-direction:column;overflow-y:auto">
+  <!-- Hero -->
+  <div style="text-align:center;padding:36px 24px 24px;border-bottom:1px solid var(--border);flex-shrink:0">
+    <svg width="200" height="200" viewBox="0 0 260 260" xmlns="http://www.w3.org/2000/svg" style="margin-bottom:12px">
       <defs>
         <radialGradient id="glow" cx="50%" cy="50%" r="50%">
           <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.15"/>
@@ -312,14 +317,9 @@ main { padding: 0 20px 16px; flex: 1; overflow: hidden; }
           <stop offset="100%" stop-color="#1d4ed8" stop-opacity="1"/>
         </radialGradient>
       </defs>
-      <!-- Background glow -->
       <circle cx="130" cy="130" r="120" fill="url(#glow)"/>
-      <!-- Outer ring -->
       <circle cx="130" cy="130" r="110" fill="none" stroke="#1e3a5f" stroke-width="1" stroke-dasharray="4 6" opacity="0.6"/>
       <circle cx="130" cy="130" r="90" fill="none" stroke="#1e3a5f" stroke-width="0.5" opacity="0.4"/>
-
-      <!-- Connection lines (drawn first, behind nodes) -->
-      <!-- Layer 1 → Layer 2 -->
       <line x1="50" y1="80"  x2="100" y2="70"  stroke="#1e3a8a" stroke-width="1.2" opacity="0.7"/>
       <line x1="50" y1="80"  x2="100" y2="110" stroke="#1e3a8a" stroke-width="1.2" opacity="0.7"/>
       <line x1="50" y1="130" x2="100" y2="70"  stroke="#1e3a8a" stroke-width="1.2" opacity="0.5"/>
@@ -327,7 +327,6 @@ main { padding: 0 20px 16px; flex: 1; overflow: hidden; }
       <line x1="50" y1="130" x2="100" y2="150" stroke="#1e3a8a" stroke-width="1.2" opacity="0.7"/>
       <line x1="50" y1="180" x2="100" y2="110" stroke="#1e3a8a" stroke-width="1.2" opacity="0.5"/>
       <line x1="50" y1="180" x2="100" y2="150" stroke="#1e3a8a" stroke-width="1.2" opacity="0.7"/>
-      <!-- Layer 2 → Layer 3 -->
       <line x1="100" y1="70"  x2="160" y2="60"  stroke="#1e40af" stroke-width="1.2" opacity="0.7"/>
       <line x1="100" y1="70"  x2="160" y2="100" stroke="#1e40af" stroke-width="1.2" opacity="0.7"/>
       <line x1="100" y1="70"  x2="160" y2="140" stroke="#1e40af" stroke-width="1.2" opacity="0.4"/>
@@ -338,7 +337,6 @@ main { padding: 0 20px 16px; flex: 1; overflow: hidden; }
       <line x1="100" y1="150" x2="160" y2="100" stroke="#1e40af" stroke-width="1.2" opacity="0.4"/>
       <line x1="100" y1="150" x2="160" y2="140" stroke="#1e40af" stroke-width="1.2" opacity="0.7"/>
       <line x1="100" y1="150" x2="160" y2="180" stroke="#1e40af" stroke-width="1.2" opacity="0.7"/>
-      <!-- Layer 3 → Layer 4 -->
       <line x1="160" y1="60"  x2="210" y2="100" stroke="#312e81" stroke-width="1.2" opacity="0.7"/>
       <line x1="160" y1="60"  x2="210" y2="130" stroke="#312e81" stroke-width="1.2" opacity="0.4"/>
       <line x1="160" y1="100" x2="210" y2="100" stroke="#312e81" stroke-width="1.2" opacity="0.7"/>
@@ -348,24 +346,18 @@ main { padding: 0 20px 16px; flex: 1; overflow: hidden; }
       <line x1="160" y1="140" x2="210" y2="160" stroke="#312e81" stroke-width="1.2" opacity="0.7"/>
       <line x1="160" y1="180" x2="210" y2="130" stroke="#312e81" stroke-width="1.2" opacity="0.4"/>
       <line x1="160" y1="180" x2="210" y2="160" stroke="#312e81" stroke-width="1.2" opacity="0.7"/>
-
-      <!-- Layer 1 nodes (input) -->
       <circle cx="50" cy="80"  r="8" fill="#1e293b" stroke="#3b82f6" stroke-width="2"/>
       <circle cx="50" cy="130" r="8" fill="#1e293b" stroke="#3b82f6" stroke-width="2"/>
       <circle cx="50" cy="180" r="8" fill="#1e293b" stroke="#3b82f6" stroke-width="2"/>
       <circle cx="50" cy="80"  r="4" fill="url(#nodeGlow)"><animate attributeName="opacity" values="1;0.4;1" dur="2.1s" repeatCount="indefinite"/></circle>
       <circle cx="50" cy="130" r="4" fill="url(#nodeGlow)"><animate attributeName="opacity" values="1;0.4;1" dur="2.8s" repeatCount="indefinite"/></circle>
       <circle cx="50" cy="180" r="4" fill="url(#nodeGlow)"><animate attributeName="opacity" values="1;0.4;1" dur="1.9s" repeatCount="indefinite"/></circle>
-
-      <!-- Layer 2 nodes (hidden 1) -->
       <circle cx="100" cy="70"  r="9" fill="#1e293b" stroke="#6366f1" stroke-width="2"/>
       <circle cx="100" cy="110" r="9" fill="#1e293b" stroke="#6366f1" stroke-width="2"/>
       <circle cx="100" cy="150" r="9" fill="#1e293b" stroke="#6366f1" stroke-width="2"/>
       <circle cx="100" cy="70"  r="5" fill="#6366f1"><animate attributeName="opacity" values="0.9;0.3;0.9" dur="2.4s" repeatCount="indefinite"/></circle>
       <circle cx="100" cy="110" r="5" fill="#6366f1"><animate attributeName="opacity" values="0.9;0.3;0.9" dur="1.7s" repeatCount="indefinite"/></circle>
       <circle cx="100" cy="150" r="5" fill="#6366f1"><animate attributeName="opacity" values="0.9;0.3;0.9" dur="3.1s" repeatCount="indefinite"/></circle>
-
-      <!-- Layer 3 nodes (hidden 2) -->
       <circle cx="160" cy="60"  r="9" fill="#1e293b" stroke="#a855f7" stroke-width="2"/>
       <circle cx="160" cy="100" r="9" fill="#1e293b" stroke="#a855f7" stroke-width="2"/>
       <circle cx="160" cy="140" r="9" fill="#1e293b" stroke="#a855f7" stroke-width="2"/>
@@ -374,26 +366,51 @@ main { padding: 0 20px 16px; flex: 1; overflow: hidden; }
       <circle cx="160" cy="100" r="5" fill="#a855f7"><animate attributeName="opacity" values="0.9;0.3;0.9" dur="1.6s" repeatCount="indefinite"/></circle>
       <circle cx="160" cy="140" r="5" fill="#a855f7"><animate attributeName="opacity" values="0.9;0.3;0.9" dur="2.9s" repeatCount="indefinite"/></circle>
       <circle cx="160" cy="180" r="5" fill="#a855f7"><animate attributeName="opacity" values="0.9;0.3;0.9" dur="2.0s" repeatCount="indefinite"/></circle>
-
-      <!-- Layer 4 nodes (output) -->
       <circle cx="210" cy="100" r="10" fill="#1e293b" stroke="#22c55e" stroke-width="2.5"/>
       <circle cx="210" cy="130" r="10" fill="#1e293b" stroke="#22c55e" stroke-width="2.5"/>
       <circle cx="210" cy="160" r="10" fill="#1e293b" stroke="#22c55e" stroke-width="2.5"/>
       <circle cx="210" cy="100" r="5" fill="#22c55e"><animate attributeName="opacity" values="1;0.3;1" dur="1.5s" repeatCount="indefinite"/></circle>
       <circle cx="210" cy="130" r="5" fill="#22c55e"><animate attributeName="opacity" values="1;0.3;1" dur="2.3s" repeatCount="indefinite"/></circle>
       <circle cx="210" cy="160" r="5" fill="#22c55e"><animate attributeName="opacity" values="1;0.3;1" dur="1.8s" repeatCount="indefinite"/></circle>
-
-      <!-- Layer labels -->
       <text x="50" y="205" text-anchor="middle" font-size="9" fill="#475569" font-family="monospace">Input</text>
       <text x="100" y="205" text-anchor="middle" font-size="9" fill="#475569" font-family="monospace">Hidden</text>
       <text x="160" y="205" text-anchor="middle" font-size="9" fill="#475569" font-family="monospace">Hidden</text>
       <text x="210" y="205" text-anchor="middle" font-size="9" fill="#475569" font-family="monospace">Output</text>
     </svg>
-
     <h2 style="font-size:26px;font-weight:800;letter-spacing:-0.4px;margin-bottom:8px">Welcome to AI</h2>
-    <p style="color:var(--muted);font-size:14px;max-width:300px;margin:0 auto">
-      Your interactive guide to Artificial Intelligence.<br>Select a topic from the left to get started.
+    <p style="color:var(--muted);font-size:14px;max-width:360px;margin:0 auto">
+      Your interactive guide to Artificial Intelligence. Select a topic from the left to get started.
     </p>
+  </div>
+
+  <!-- Content section -->
+  <div style="max-width:760px;margin:0 auto;padding:32px 32px 48px;width:100%">
+
+    <div style="margin-bottom:28px">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--blue);margin-bottom:10px">Who Decides Which RAG Strategy to Use?</div>
+      <p style="font-size:14px;color:var(--muted);line-height:1.85;margin:0">
+        The developer who builds the RAG system decides which strategy to use. When a developer writes the code, they choose every step — how to chunk, how to embed, how to retrieve. This is done through code or configuration files, not through chat commands. If a company uses a platform like Azure or AWS, their technical team sets it through platform settings. If you are an end user of a finished product like a chatbot, the decision was already made for you before you even opened the application. <strong style="color:var(--text)">You as an end user have no control over it — the pipeline is fixed at build time, not at runtime.</strong>
+      </p>
+    </div>
+
+    <div style="border-top:1px solid var(--border);padding-top:28px">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--purple);margin-bottom:10px">Strategies Are Not Rigid Boxes</div>
+      <p style="font-size:14px;color:var(--muted);line-height:1.85;margin:0">
+        Importantly, it is not always one pure strategy. A developer can mix techniques from both. For example, a system might use fixed-size chunking from Naive RAG, but add hybrid search and re-ranking from Advanced RAG. Another system might use semantic chunking and multiple vectors, but skip post-retrieval compression to keep response times fast. <strong style="color:var(--text)">Naive RAG and Advanced RAG are not two rigid boxes — they are a collection of individual techniques</strong>, and developers pick and combine them based on their specific needs, budget, and performance requirements.
+      </p>
+    </div>
+
+    <div style="display:flex;gap:12px;margin-top:32px;flex-wrap:wrap">
+      <button onclick="showRAG()" style="display:inline-flex;align-items:center;gap:8px;background:var(--blue);border:none;border-radius:8px;color:#fff;font:600 13px inherit;padding:10px 20px;cursor:pointer;transition:opacity .15s" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+        Explore RAG Strategies →
+      </button>
+      <button onclick="showEval()" style="display:inline-flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font:600 13px inherit;padding:10px 20px;cursor:pointer;transition:border-color .15s" onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'">
+        Try RAG Evaluation
+      </button>
+      <button onclick="showLangchain()" style="display:inline-flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font:600 13px inherit;padding:10px 20px;cursor:pointer;transition:border-color .15s" onmouseover="this.style.borderColor='var(--purple)'" onmouseout="this.style.borderColor='var(--border)'">
+        LangChain Patterns
+      </button>
+    </div>
   </div>
 </div>
 
@@ -752,6 +769,12 @@ function hidePanels() {
   document.getElementById("ragPage").style.display = "none";
   document.getElementById("evalPage").style.display = "none";
   document.getElementById("langchainPage").style.display = "none";
+}
+
+function showHome() {
+  hidePanels();
+  document.getElementById("welcomePage").style.display = "flex";
+  setActiveToc("toc-home");
 }
 
 function showRAG() {
