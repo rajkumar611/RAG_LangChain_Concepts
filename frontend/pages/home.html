@@ -47,6 +47,38 @@
       </p>
     </div>
 
+    <!-- RAG acronym breakdown + without/with comparison -->
+    <div style="margin-bottom:40px">
+      <div style="font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--blue);margin-bottom:12px">What is RAG?</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.85;margin:0 0 16px">RAG stands for <strong style="color:var(--text)">Retrieval-Augmented Generation</strong>:</p>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px">
+        <div style="display:flex;align-items:flex-start;gap:12px">
+          <span style="background:var(--blue);color:#fff;border-radius:5px;font-size:11px;font-weight:700;padding:3px 9px;white-space:nowrap;margin-top:1px">Retrieve</span>
+          <span style="font-size:13px;color:var(--muted);line-height:1.7">Find relevant information from your knowledge base</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px">
+          <span style="background:var(--purple);color:#fff;border-radius:5px;font-size:11px;font-weight:700;padding:3px 9px;white-space:nowrap;margin-top:1px">Augment</span>
+          <span style="font-size:13px;color:var(--muted);line-height:1.7">Feed that information to an AI model</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px">
+          <span style="background:var(--green);color:#fff;border-radius:5px;font-size:11px;font-weight:700;padding:3px 9px;white-space:nowrap;margin-top:1px">Generate</span>
+          <span style="font-size:13px;color:var(--muted);line-height:1.7">AI creates a response using both its training + retrieved knowledge</span>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px">
+          <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">Without RAG</div>
+          <div style="font-size:13px;color:var(--text);font-style:italic;margin-bottom:8px">"What's the latest on AI?"</div>
+          <div style="font-size:13px;color:var(--muted);line-height:1.7">→ AI uses only training data <span style="color:#f59e0b;font-weight:600">(may be outdated)</span></div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--green);border-radius:var(--radius);padding:18px 20px">
+          <div style="font-size:12px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">With RAG</div>
+          <div style="font-size:13px;color:var(--text);font-style:italic;margin-bottom:8px">"What's the latest on AI?"</div>
+          <div style="font-size:13px;color:var(--muted);line-height:1.7">→ AI retrieves current documents → Uses them to generate a <strong style="color:var(--text)">fresh, accurate answer</strong></div>
+        </div>
+      </div>
+    </div>
+
     <!-- Nav buttons -->
     <div style="display:flex;gap:12px;flex-wrap:wrap;padding-top:4px;border-top:1px solid var(--border);">
       <button onclick="showNaiveRAG()" style="display:inline-flex;align-items:center;gap:8px;background:var(--blue);border:none;border-radius:8px;color:#fff;font:600 15px inherit;padding:10px 20px;cursor:pointer;transition:opacity .15s;margin-top:20px" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
