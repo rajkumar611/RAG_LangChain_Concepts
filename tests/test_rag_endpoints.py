@@ -2,10 +2,10 @@
 Integration tests for RAG API endpoints.
 LLM calls are mocked so tests run without an Anthropic API key or network.
 """
+
 import json
-from unittest.mock import patch
-import pytest
 import os
+from unittest.mock import patch
 
 os.environ.setdefault("ANTHROPIC_API_KEY", "sk-test-dummy")
 
@@ -18,7 +18,6 @@ def _mock_llm(prompt: str, max_tokens: int = 512) -> str:
 
 # ── /upload ───────────────────────────────────────────────────────────────────
 class TestUpload:
-
     def test_upload_txt_success(self, client, sample_text):
         resp = client.post(
             "/upload",
@@ -48,10 +47,10 @@ class TestUpload:
 
 # ── /rag/naive ────────────────────────────────────────────────────────────────
 class TestNaiveRag:
-
     def test_no_docs_returns_guidance(self, client):
         # Reset global state to simulate no uploads
         import src.rag.routes as r
+
         original = r.DOCS[:]
         r.DOCS.clear()
         resp = client.post("/rag/naive", json={"query": "what is RAG?"})
@@ -92,7 +91,6 @@ class TestNaiveRag:
 
 # ── /rag/hybrid ───────────────────────────────────────────────────────────────
 class TestHybridRag:
-
     def test_returns_both_result_sets(self, uploaded_client):
         with patch("src.rag.routes.llm", side_effect=_mock_llm):
             resp = uploaded_client.post("/rag/hybrid", json={"query": "retrieval"})
@@ -111,10 +109,9 @@ class TestHybridRag:
 
 # ── /rag/evaluate ─────────────────────────────────────────────────────────────
 class TestRagEvaluate:
-
     BASE_PAYLOAD = {
         "question": "What is RAG?",
-        "answer":   "RAG combines retrieval with generation.",
+        "answer": "RAG combines retrieval with generation.",
         "contexts": ["RAG stands for Retrieval Augmented Generation."],
     }
 

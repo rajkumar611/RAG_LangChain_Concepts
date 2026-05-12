@@ -1,7 +1,9 @@
 """
 Pytest fixtures shared across the test suite.
 """
+
 import os
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -13,6 +15,7 @@ os.environ.setdefault("ANTHROPIC_API_KEY", "sk-test-dummy")
 def client():
     """FastAPI TestClient — imports the app once per test session."""
     from app import app
+
     return TestClient(app)
 
 

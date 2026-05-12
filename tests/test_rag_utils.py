@@ -2,21 +2,26 @@
 Unit tests for RAG utility functions.
 These tests do NOT call the LLM — they verify retrieval and chunking logic only.
 """
-import pytest
 
 # Ensure dummy key is set before importing routes
 import os
+
+import pytest
+
 os.environ.setdefault("ANTHROPIC_API_KEY", "sk-test-dummy")
 
 from src.rag.routes import (
-    chunk_text, MAX_CHUNKS,
-    rebuild_indexes, vector_search, bm25_search, reciprocal_rank_fusion,
+    MAX_CHUNKS,
+    bm25_search,
+    chunk_text,
+    rebuild_indexes,
+    reciprocal_rank_fusion,
+    vector_search,
 )
 
 
 # ── chunk_text ────────────────────────────────────────────────────────────────
 class TestChunkText:
-
     def test_basic_paragraph_split(self):
         text = "First paragraph with enough content here.\n\nSecond paragraph with enough content here."
         chunks = chunk_text(text)
@@ -30,7 +35,7 @@ class TestChunkText:
 
     def test_long_paragraph_split_at_sentence(self):
         sentence = "This is a sentence with some words. "
-        long_para = sentence * 20          # ~720 chars — exceeds MAX_CHUNK_CHARS=400
+        long_para = sentence * 20  # ~720 chars — exceeds MAX_CHUNK_CHARS=400
         chunks = chunk_text(long_para, max_chars=400)
         assert len(chunks) > 1
         for chunk in chunks:
@@ -60,7 +65,6 @@ class TestChunkText:
 
 # ── vector_search / bm25_search ───────────────────────────────────────────────
 class TestSearchFunctions:
-
     @pytest.fixture(autouse=True)
     def _seed_indexes(self):
         """Seed the global indexes with known documents before each test."""
@@ -105,9 +109,8 @@ class TestSearchFunctions:
 
 # ── reciprocal_rank_fusion ────────────────────────────────────────────────────
 class TestReciprocalRankFusion:
-
     def _make_list(self, ids: list[int], texts: list[str]) -> list[dict]:
-        return [{"id": i, "text": t, "score": 1.0} for i, t in zip(ids, texts)]
+        return [{"id": i, "text": t, "score": 1.0} for i, t in zip(ids, texts, strict=False)]
 
     def test_single_list_passthrough(self):
         rebuild_indexes(["doc zero", "doc one", "doc two"])
@@ -128,8 +131,12 @@ class TestReciprocalRankFusion:
 
     def test_scores_descending(self):
         rebuild_indexes(["alpha document", "beta document", "gamma document", "delta document"])
-        list1 = self._make_list([0, 1, 2, 3], ["alpha document", "beta document", "gamma document", "delta document"])
-        list2 = self._make_list([3, 2, 1, 0], ["delta document", "gamma document", "beta document", "alpha document"])
+        list1 = self._make_list(
+            [0, 1, 2, 3], ["alpha document", "beta document", "gamma document", "delta document"]
+        )
+        list2 = self._make_list(
+            [3, 2, 1, 0], ["delta document", "gamma document", "beta document", "alpha document"]
+        )
         fused = reciprocal_rank_fusion([list1, list2])
         scores = [r["score"] for r in fused]
         assert scores == sorted(scores, reverse=True)
