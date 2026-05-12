@@ -1,0 +1,249 @@
+<div style="flex:1;overflow:hidden;flex-direction:column;display:flex">
+
+<!-- ── OVERVIEW ─────────────────────────────────────────────────────────── -->
+<div id="lc-overview" style="flex:1;overflow-y:auto;padding:24px 32px">
+  <div style="max-width:960px;margin:0 auto;display:flex;flex-direction:column;gap:20px">
+
+    <!-- What is it -->
+    <div class="card">
+      <div class="card-title">What is LangChain?</div>
+      <p style="font-size:14px;line-height:1.9;color:var(--muted)">
+        LangChain is a <strong style="color:var(--text)">Python library</strong>
+        (<code style="background:var(--bg);padding:1px 6px;border-radius:4px;color:#22c55e">pip install langchain</code>)
+        — technically a library, but called a framework because it gives you a
+        <strong style="color:var(--text)">structured way to build LLM applications</strong> by chaining components:
+        <strong style="color:var(--blue)">prompts → LLM → memory → tools → output parsers</strong>.<br><br>
+        <strong style="color:var(--text)">Why it exists:</strong> Before LangChain, connecting an LLM to a vector DB, memory, and tools
+        required writing all the glue code yourself. LangChain standardised those patterns so you don't reinvent the wheel.<br><br>
+        <strong style="color:var(--text)">One line summary:</strong> Ready-made building blocks for any LLM application —
+        retrieval, memory, agents, tools, and more.
+      </p>
+    </div>
+
+    <!-- Ecosystem -->
+    <div style="background:#0d2240;border:1px solid var(--blue);border-radius:var(--radius);padding:16px 20px">
+      <div class="card-title">The LangChain Ecosystem</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:13px">
+        <div style="background:#1e293b;border-radius:8px;padding:12px">
+          <div style="font-weight:700;color:var(--blue);margin-bottom:4px">LangChain (library)</div>
+          <div style="color:var(--muted)">Building blocks — prompts, chains, tools, memory, RAG, agents</div>
+        </div>
+        <div style="background:#1e293b;border-radius:8px;padding:12px">
+          <div style="font-weight:700;color:var(--purple);margin-bottom:4px">LangGraph (library)</div>
+          <div style="color:var(--muted)">Built ON TOP of LangChain — orchestrates complex multi-agent flows as a graph</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 10 usages grid -->
+    <div class="card-title" style="font-size:13px;color:var(--text);font-weight:700;text-transform:none;letter-spacing:0">Complete Usage Guide — click any card to try the demo live</div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+
+      <!-- 1 -->
+      <div class="card lc-nav-card" onclick="showLCDemo(1)" style="cursor:pointer;transition:border-color .15s" onmouseover="this.style.borderColor='#3b82f6'" onmouseout="this.style.borderColor='var(--border)'">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+          <span style="background:#1e3a5f;color:var(--blue);border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700">1</span>
+          <span style="font-weight:700">Prompt Management</span>
+          <span style="margin-left:auto;font-size:10px;color:var(--green);background:#14532d22;border:1px solid var(--green);border-radius:999px;padding:1px 7px">No Agent</span>
+        </div>
+        <p style="font-size:12px;color:var(--muted);line-height:1.7">Reusable prompt templates with variables. Supports system prompts, few-shot examples, and chat history injection. No more hardcoded strings.</p>
+        <div style="margin-top:10px;font-size:11px;color:var(--blue);font-weight:600">Try Demo →</div>
+      </div>
+
+      <!-- 2 -->
+      <div class="card lc-nav-card" onclick="showLCDemo(2)" style="cursor:pointer;transition:border-color .15s" onmouseover="this.style.borderColor='#3b82f6'" onmouseout="this.style.borderColor='var(--border)'">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+          <span style="background:#1e3a5f;color:var(--blue);border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700">2</span>
+          <span style="font-weight:700">LLM Chaining</span>
+          <span style="margin-left:auto;font-size:10px;color:var(--green);background:#14532d22;border:1px solid var(--green);border-radius:999px;padding:1px 7px">No Agent</span>
+        </div>
+        <p style="font-size:12px;color:var(--muted);line-height:1.7">Connect multiple LLM calls in sequence. Output of Step 1 becomes input of Step 2. Example: Translate → Summarise → Format as JSON.</p>
+        <div style="margin-top:10px;font-size:11px;color:var(--blue);font-weight:600">Try Demo →</div>
+      </div>
+
+      <!-- 3 -->
+      <div class="card lc-nav-card" onclick="showLCDemo(3)" style="cursor:pointer;transition:border-color .15s" onmouseover="this.style.borderColor='#3b82f6'" onmouseout="this.style.borderColor='var(--border)'">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+          <span style="background:#1e3a5f;color:var(--blue);border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700">3</span>
+          <span style="font-weight:700">RAG</span>
+          <span style="margin-left:auto;font-size:10px;color:var(--green);background:#14532d22;border:1px solid var(--green);border-radius:999px;padding:1px 7px">No Agent</span>
+        </div>
+        <p style="font-size:12px;color:var(--muted);line-height:1.7">Load PDFs/Word/Web → chunk → embed → store in vector DB → retrieve → generate. Built-in connectors for Pinecone, Chroma, FAISS, Weaviate.</p>
+        <div style="margin-top:10px;font-size:11px;color:var(--blue);font-weight:600">Try Demo →</div>
+      </div>
+
+      <!-- 4 -->
+      <div class="card lc-nav-card" onclick="showLCDemo(4)" style="cursor:pointer;transition:border-color .15s" onmouseover="this.style.borderColor='#3b82f6'" onmouseout="this.style.borderColor='var(--border)'">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+          <span style="background:#1e3a5f;color:var(--blue);border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700">4</span>
+          <span style="font-weight:700">Memory</span>
+          <span style="margin-left:auto;font-size:10px;color:var(--green);background:#14532d22;border:1px solid var(--green);border-radius:999px;padding:1px 7px">No Agent</span>
+        </div>
+        <p style="font-size:12px;color:var(--muted);line-height:1.7">Give chatbots conversation history. Short-term: last N messages in context. Long-term: stored in a DB, recalled when relevant.</p>
+        <div style="margin-top:10px;font-size:11px;color:var(--blue);font-weight:600">Try Demo →</div>
+      </div>
+
+      <!-- 5 -->
+      <div class="card lc-nav-card" onclick="showLCDemo(5)" style="cursor:pointer;transition:border-color .15s" onmouseover="this.style.borderColor='#3b82f6'" onmouseout="this.style.borderColor='var(--border)'">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+          <span style="background:#1e3a5f;color:var(--blue);border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700">5</span>
+          <span style="font-weight:700">Tools & Function Calling</span>
+          <span style="margin-left:auto;font-size:10px;color:var(--green);background:#14532d22;border:1px solid var(--green);border-radius:999px;padding:1px 7px">No Agent</span>
+        </div>
+        <p style="font-size:12px;color:var(--muted);line-height:1.7">Connect LLM to web search, calculator, Wikipedia, Python REPL, your own APIs and databases. LLM decides when to call which tool.</p>
+        <div style="margin-top:10px;font-size:11px;color:var(--blue);font-weight:600">Try Demo →</div>
+      </div>
+
+      <!-- 6 -->
+      <div class="card lc-nav-card" onclick="showLCDemo(6)" style="cursor:pointer;transition:border-color .15s" onmouseover="this.style.borderColor='#3b82f6'" onmouseout="this.style.borderColor='var(--border)'">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+          <span style="background:#1e3a5f;color:var(--blue);border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700">6</span>
+          <span style="font-weight:700">Document Processing</span>
+          <span style="margin-left:auto;font-size:10px;color:var(--green);background:#14532d22;border:1px solid var(--green);border-radius:999px;padding:1px 7px">No Agent</span>
+        </div>
+        <p style="font-size:12px;color:var(--muted);line-height:1.7">50+ built-in loaders: PDF, CSV, HTML, Notion, Google Drive and more. Automatic chunking and embedding pipeline — saves hundreds of lines of boilerplate.</p>
+        <div style="margin-top:10px;font-size:11px;color:var(--blue);font-weight:600">Try Demo →</div>
+      </div>
+
+      <!-- 7 -->
+      <div class="card lc-nav-card" onclick="showLCDemo(7)" style="cursor:pointer;transition:border-color .15s" onmouseover="this.style.borderColor='#3b82f6'" onmouseout="this.style.borderColor='var(--border)'">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+          <span style="background:#1e3a5f;color:var(--blue);border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700">7</span>
+          <span style="font-weight:700">Output Parsers</span>
+          <span style="margin-left:auto;font-size:10px;color:var(--green);background:#14532d22;border:1px solid var(--green);border-radius:999px;padding:1px 7px">No Agent</span>
+        </div>
+        <p style="font-size:12px;color:var(--muted);line-height:1.7">Force LLM to return structured JSON, Python objects, or typed lists — not raw text. Built-in validation with automatic retries if format is wrong.</p>
+        <div style="margin-top:10px;font-size:11px;color:var(--blue);font-weight:600">Try Demo →</div>
+      </div>
+
+      <!-- 8 -->
+      <div class="card lc-nav-card" onclick="showLCDemo(8)" style="cursor:pointer;transition:border-color .15s" onmouseover="this.style.borderColor='#f59e0b'" onmouseout="this.style.borderColor='var(--border)'">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+          <span style="background:#78350f44;color:var(--amber);border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700">8</span>
+          <span style="font-weight:700">Single Agent</span>
+          <span style="margin-left:auto;font-size:10px;color:var(--amber);background:#78350f22;border:1px solid var(--amber);border-radius:999px;padding:1px 7px">Agent</span>
+        </div>
+        <p style="font-size:12px;color:var(--muted);line-height:1.7">One LLM with tools. LLM reasons → picks a tool → observes result → reasons again → answers. Loop continues until satisfied.</p>
+        <div style="margin-top:10px;font-size:11px;color:var(--amber);font-weight:600">Try Demo →</div>
+      </div>
+
+      <!-- 9 -->
+      <div class="card lc-nav-card" onclick="showLCDemo(9)" style="cursor:pointer;transition:border-color .15s" onmouseover="this.style.borderColor='#f59e0b'" onmouseout="this.style.borderColor='var(--border)'">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+          <span style="background:#78350f44;color:var(--amber);border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700">9</span>
+          <span style="font-weight:700">Multi-Agent (Simple)</span>
+          <span style="margin-left:auto;font-size:10px;color:var(--amber);background:#78350f22;border:1px solid var(--amber);border-radius:999px;padding:1px 7px">Agent</span>
+        </div>
+        <p style="font-size:12px;color:var(--muted);line-height:1.7">Multiple agents wired together manually in LangChain. One agent calls another as a tool. Works for simple, predictable flows.</p>
+        <div style="margin-top:10px;font-size:11px;color:var(--amber);font-weight:600">Try Demo →</div>
+      </div>
+
+      <!-- 10 -->
+      <div class="card lc-nav-card" onclick="showLCDemo(10)" style="cursor:pointer;border-color:var(--purple);transition:border-color .15s" onmouseover="this.style.borderColor='#c084fc'" onmouseout="this.style.borderColor='var(--purple)'">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+          <span style="background:#581c8744;color:var(--purple);border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700">10</span>
+          <span style="font-weight:700">Multi-Agent (Complex) — LangGraph</span>
+          <span style="margin-left:auto;font-size:10px;color:var(--purple);background:#581c8722;border:1px solid var(--purple);border-radius:999px;padding:1px 7px">LangGraph</span>
+        </div>
+        <p style="font-size:12px;color:var(--muted);line-height:1.7">Agents as graph nodes, routing as edges. Handles state, loops, parallel execution, human-in-the-loop.</p>
+        <div style="margin-top:10px;font-size:11px;color:var(--purple);font-weight:600">Try Demo →</div>
+      </div>
+
+    </div>
+
+    <!-- Who does NOT use LangChain -->
+    <div class="card">
+      <div class="card-title">Who does NOT use LangChain?</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+        <div style="background:var(--bg);border-radius:8px;padding:12px;border:1px solid var(--border)">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><span style="color:#ef4444">✗</span><span style="font-size:13px;font-weight:600">ChatGPT</span></div>
+          <p style="font-size:12px;color:var(--muted)">Built entirely in-house by OpenAI. LangChain is for devs building ON TOP of it.</p>
+        </div>
+        <div style="background:var(--bg);border-radius:8px;padding:12px;border:1px solid var(--border)">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><span style="color:#ef4444">✗</span><span style="font-size:13px;font-weight:600">Claude / Claude Code</span></div>
+          <p style="font-size:12px;color:var(--muted)">Anthropic uses their own SDK directly. No LangChain involved.</p>
+        </div>
+        <div style="background:var(--bg);border-radius:8px;padding:12px;border:1px solid var(--border)">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><span style="color:#ef4444">✗</span><span style="font-size:13px;font-weight:600">Simple one-off tasks</span></div>
+          <p style="font-size:12px;color:var(--muted)">One prompt, one response, done. LangChain adds unnecessary overhead.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- When to use table -->
+    <div class="card">
+      <div class="card-title">When to use LangChain</div>
+      <div style="border:1px solid var(--border);border-radius:8px;overflow:hidden">
+        <div style="display:grid;grid-template-columns:1fr auto;background:#1e3a5f">
+          <div style="padding:9px 14px;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase">You are building…</div>
+          <div style="padding:9px 14px;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase">Use LangChain?</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr auto;border-top:1px solid var(--border)">
+          <div style="padding:10px 14px;font-size:13px;color:var(--muted)">A RAG app over your internal knowledge base</div>
+          <div style="padding:10px 14px;font-size:13px;font-weight:700;color:#22c55e">✅ Yes</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr auto;border-top:1px solid var(--border)">
+          <div style="padding:10px 14px;font-size:13px;color:var(--muted)">An AI agent that browses the web + answers</div>
+          <div style="padding:10px 14px;font-size:13px;font-weight:700;color:#22c55e">✅ Yes</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr auto;border-top:1px solid var(--border)">
+          <div style="padding:10px 14px;font-size:13px;color:var(--muted)">Multi-agent system with complex routing</div>
+          <div style="padding:10px 14px;font-size:13px;font-weight:700;color:#a855f7">✅ LangGraph</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr auto;border-top:1px solid var(--border)">
+          <div style="padding:10px 14px;font-size:13px;color:var(--muted)">ChatGPT / Claude itself</div>
+          <div style="padding:10px 14px;font-size:13px;font-weight:700;color:#ef4444">❌ No</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Simple rule -->
+    <div style="background:#0d2240;border:1px solid var(--blue);border-radius:var(--radius);padding:16px 20px">
+      <div class="card-title">Simple Rule</div>
+      <p style="font-size:14px;line-height:1.8">LangChain is for <strong style="color:var(--blue)">consumers of LLM APIs</strong>, not producers.
+      Use it when building Gen AI apps or AI Agents on top of existing LLMs.<br>
+      For complex multi-agent orchestration, add <strong style="color:var(--purple)">LangGraph</strong> — it's part of the same ecosystem, not a replacement.</p>
+    </div>
+
+  </div><!-- end overview inner -->
+</div><!-- end lc-overview -->
+
+<!-- ── DEMO CONTAINER ────────────────────────────────────────────────────── -->
+<div id="lc-demo-container" style="display:none;flex-direction:column;flex:1;overflow:hidden">
+
+  <!-- nav bar -->
+  <div style="background:#131f35;border-bottom:1px solid var(--border);padding:10px 24px;display:flex;align-items:center;gap:16px;flex-shrink:0">
+    <button onclick="showLCOverview()"
+      style="background:none;border:1px solid var(--border);border-radius:6px;color:var(--muted);font:13px inherit;padding:5px 14px;cursor:pointer;transition:all .15s"
+      onmouseover="this.style.borderColor='#3b82f6';this.style.color='#3b82f6'"
+      onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">← Overview</button>
+    <span id="lc-demo-heading" style="font-weight:700;font-size:14px;color:var(--text)"></span>
+    <span id="lc-demo-badge" style="font-size:10px;font-weight:700;padding:2px 9px;border-radius:999px"></span>
+    <div style="margin-left:auto;display:flex;gap:8px">
+      <button onclick="showLCCode('with')" title="View LangChain source code"
+        style="background:none;border:1px solid var(--border);border-radius:6px;color:var(--muted);font:12px inherit;padding:5px 13px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px"
+        onmouseover="this.style.borderColor='#a855f7';this.style.color='#a855f7'"
+        onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        With LangChain
+      </button>
+      <button onclick="showLCCode('without')" title="View equivalent code without LangChain"
+        style="background:none;border:1px solid var(--border);border-radius:6px;color:var(--muted);font:12px inherit;padding:5px 13px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px"
+        onmouseover="this.style.borderColor='#f59e0b';this.style.color='#f59e0b'"
+        onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        Without LangChain
+      </button>
+    </div>
+  </div>
+
+  <!-- 2-col layout -->
+  <div style="flex:1;display:grid;grid-template-columns:300px 1fr;overflow:hidden">
+    <div id="lc-left"  style="border-right:1px solid var(--border);overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;background:#0c1525"></div>
+    <div id="lc-right" style="overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px"></div>
+  </div>
+
+</div><!-- end lc-demo-container -->
+
+</div>

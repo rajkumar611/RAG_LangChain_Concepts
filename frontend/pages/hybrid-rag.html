@@ -1,0 +1,148 @@
+<div style="flex:1;overflow-y:auto">
+  <div style="max-width:800px;margin:0 auto;padding:40px 32px 56px;width:100%">
+
+    <!-- Header -->
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
+      <span style="background:#1e3a5f;color:var(--blue);font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;letter-spacing:.05em">STRATEGY 4 OF 5</span>
+      <span style="background:#14532d22;color:var(--green);border:1px solid var(--green);font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;letter-spacing:.05em">Practical Best</span>
+    </div>
+    <h2 style="font-size:28px;font-weight:800;letter-spacing:-0.4px;color:var(--text);margin-bottom:10px">Hybrid RAG</h2>
+    <p style="font-size:15px;color:var(--muted);line-height:1.8;margin-bottom:32px;max-width:660px">
+      Combines the strengths of two fundamentally different retrieval methods — dense vector search for semantic understanding and sparse BM25 for exact keyword matching — then fuses their rankings with Reciprocal Rank Fusion.
+    </p>
+
+    <!-- Pipeline -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;margin-bottom:32px">
+      <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:16px">Pipeline</div>
+      <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px">
+        <div style="background:var(--bg);border:1px solid var(--blue);color:var(--blue);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600">User Question</div>
+        <span style="color:var(--muted);font-size:16px">→</span>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="background:var(--bg);border:1px solid var(--blue);color:var(--blue);border-radius:6px;padding:5px 12px;font-size:12px;font-weight:600">Dense (Vector) Search</div>
+          <div style="background:var(--bg);border:1px solid var(--amber);color:var(--amber);border-radius:6px;padding:5px 12px;font-size:12px;font-weight:600">Sparse (BM25) Search</div>
+        </div>
+        <span style="color:var(--muted);font-size:16px">→</span>
+        <div style="background:var(--bg);border:1px solid var(--green);color:var(--green);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600">RRF Fusion</div>
+        <span style="color:var(--muted);font-size:16px">→</span>
+        <div style="background:var(--bg);border:1px solid var(--purple);color:var(--purple);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600">Top-K Chunks</div>
+        <span style="color:var(--muted);font-size:16px">→</span>
+        <div style="background:var(--bg);border:1px solid var(--green);color:var(--green);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600">LLM Answer</div>
+      </div>
+    </div>
+
+    <!-- How it works -->
+    <div style="margin-bottom:32px">
+      <div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--blue);margin-bottom:12px">How It Works</div>
+      <div style="display:grid;gap:10px">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:12px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Step 1 — Dual Indexing</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.75">At upload time, documents are indexed twice: as embedding vectors (dense) for semantic search, and as a TF-IDF matrix (sparse) for keyword search. Both indexes are maintained simultaneously in memory and queried in parallel on every request.</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:12px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Step 2 — Parallel Retrieval</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.75">The same query runs through both systems at once. <strong style="color:var(--text)">Dense retrieval</strong> finds semantically similar chunks (good for paraphrasing, synonyms, and conceptual matches). <strong style="color:var(--text)">Sparse retrieval</strong> finds exact keyword matches (good for names, codes, product IDs, and technical terms).</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:12px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Step 3 — RRF Fusion</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.75">Reciprocal Rank Fusion combines both ranked lists without needing learned weights. Each chunk gets a score of <code style="background:var(--bg);padding:1px 6px;border-radius:4px;font-size:12px">1/(k+rank)</code> from each list. Scores are summed across lists. <code style="background:var(--bg);padding:1px 6px;border-radius:4px;font-size:12px">k=60</code> is the standard constant that prevents very high scores for top-ranked documents.</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:12px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Step 4 — LLM Generation</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.75">The top fused chunks are passed to the LLM. Each chunk carries a source badge (vector, BM25, or both) indicating which retrieval method found it — this transparency helps you understand why each piece of context was included.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- When to use / When not to use -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:32px">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px">
+        <div style="font-size:13px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">When to Use It</div>
+        <ul style="font-size:14px;color:var(--muted);line-height:1.8;padding-left:16px;margin:0">
+          <li style="margin-bottom:6px">Queries mix semantic questions and exact keyword lookups</li>
+          <li style="margin-bottom:6px">Documents contain technical terms, product codes, or proper nouns</li>
+          <li style="margin-bottom:6px">You want better recall than pure vector search</li>
+          <li>You want a practical upgrade over Naive RAG without full Advanced complexity</li>
+        </ul>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px">
+        <div style="font-size:13px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">When Not to Use It</div>
+        <ul style="font-size:14px;color:var(--muted);line-height:1.8;padding-left:16px;margin:0">
+          <li style="margin-bottom:6px">Documents are purely narrative with no specific keywords to match</li>
+          <li style="margin-bottom:6px">You need the absolute lowest latency — two searches instead of one</li>
+          <li>Infrastructure only supports one index type</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Strengths and Limitations -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:32px">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px">
+        <div style="font-size:12px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">Strengths</div>
+        <ul style="font-size:14px;color:var(--muted);line-height:1.8;padding-left:16px;margin:0">
+          <li style="margin-bottom:5px">Best of both worlds — semantic coverage plus keyword precision</li>
+          <li style="margin-bottom:5px">Simple fusion via RRF — no learned weights or training required</li>
+          <li>Noticeably better recall than naive vector-only search</li>
+        </ul>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px">
+        <div style="font-size:12px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">Limitations</div>
+        <ul style="font-size:14px;color:var(--muted);line-height:1.8;padding-left:16px;margin:0">
+          <li style="margin-bottom:5px">Double the indexing overhead — two structures to build and maintain</li>
+          <li style="margin-bottom:5px">Two query paths to keep in sync</li>
+          <li>Still no reranking — RRF is better than one signal but not as precise as a cross-encoder</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Key concepts -->
+    <div style="margin-bottom:36px">
+      <div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--blue);margin-bottom:12px">Key Concepts</div>
+      <div style="display:grid;gap:10px">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">Dense Retrieval <span style="font-size:11px;font-weight:600;color:var(--blue);background:#1e3a5f33;padding:2px 8px;border-radius:999px;margin-left:6px">vector search · semantic</span></div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.7">Uses embeddings to find chunks that are semantically similar to the query, even if they use different words. This app uses <code style="background:var(--bg);padding:1px 6px;border-radius:4px;font-size:12px">all-MiniLM-L6-v2</code> and a NumPy dot product — the same model used across all RAG strategies.</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">Sparse Retrieval <span style="font-size:11px;font-weight:600;color:var(--amber);background:#78350f22;padding:2px 8px;border-radius:999px;margin-left:6px">TF-IDF BM25 · keyword</span></div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.7">Uses term frequency and inverse document frequency to score chunks that contain the exact words from the query. Excellent for technical terms, proper names, codes, or any string where the exact wording matters. This app uses scikit-learn's <code style="background:var(--bg);padding:1px 6px;border-radius:4px;font-size:12px">TfidfVectorizer</code>.</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">Reciprocal Rank Fusion <span style="font-size:11px;font-weight:600;color:var(--green);background:#14532d22;padding:2px 8px;border-radius:999px;margin-left:6px">formula: 1/(k+rank) · k=60</span></div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.7">A score-free algorithm for merging ranked lists from different retrieval systems. Each document in each list receives a score of <code style="background:var(--bg);padding:1px 6px;border-radius:4px;font-size:12px">1/(60+rank)</code>. Scores are summed. Documents that rank highly in multiple lists bubble to the top. No training or learned weights are needed.</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">Implementation in This App</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.7">This app uses NumPy dot product for dense search and sklearn TF-IDF for sparse search. Both indexes are built at upload time via <code style="background:var(--bg);padding:1px 6px;border-radius:4px;font-size:12px">rebuild_indexes()</code> and stored in memory. The <code style="background:var(--bg);padding:1px 6px;border-radius:4px;font-size:12px">reciprocal_rank_fusion()</code> utility handles the merge.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Try it -->
+    <div style="border-top:1px solid var(--border);padding-top:28px">
+      <div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--blue);margin-bottom:6px">Try It</div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Upload a PDF or TXT document first, then ask a question. The result will show which chunks came from dense (vector) search and which came from sparse (BM25) search.</p>
+
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius)">
+        <label style="display:inline-flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font:600 13px inherit;padding:7px 14px;cursor:pointer;transition:border-color .15s" onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Upload Document
+          <input type="file" accept=".pdf,.txt" style="display:none" onchange="hybridUploadFile(this)">
+        </label>
+        <span id="hybrid-upload-status" style="font-size:12px;color:var(--muted)">No document loaded</span>
+      </div>
+
+      <textarea id="hybrid-query" placeholder="e.g. What specific metrics or numbers are mentioned?" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:10px 12px;font:14px inherit;resize:vertical;min-height:72px;outline:none;transition:border-color .15s;box-sizing:border-box" onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+
+      <button onclick="runHybridRAG()" style="margin-top:10px;padding:10px 24px;background:var(--blue);border:none;border-radius:8px;color:#fff;font:600 14px inherit;cursor:pointer;transition:opacity .15s" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+        Run Hybrid RAG
+      </button>
+
+      <div id="hybrid-result" style="display:none;margin-top:16px">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Response</div>
+        <div id="hybrid-answer" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;font-size:13px;color:var(--text);line-height:1.8;white-space:pre-wrap"></div>
+        <div id="hybrid-chunks" style="margin-top:10px"></div>
+      </div>
+    </div>
+
+  </div>
+</div>

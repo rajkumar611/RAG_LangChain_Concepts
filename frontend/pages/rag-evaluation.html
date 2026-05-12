@@ -1,0 +1,59 @@
+<div style="display:flex;flex-direction:column;flex:1;overflow:hidden">
+  <div style="flex:1;overflow-y:auto;padding:24px 32px;max-width:900px;margin:0 auto;width:100%">
+
+    <div style="margin-bottom:24px">
+      <h2 style="font-size:22px;font-weight:700;color:var(--text);margin:0 0 8px">RAG Evaluation — LLM as Judge</h2>
+      <p style="color:var(--muted);font-size:13px;line-height:1.7;margin:0">
+        Evaluate the quality of any RAG output across three RAGAS-aligned metrics using Claude as an evaluator.
+        Paste in a question, the generated answer, and the retrieved context chunks that were used.
+        Optionally provide a ground truth answer to also score <strong>Correctness</strong>.
+      </p>
+    </div>
+
+    <div style="display:grid;gap:14px;margin-bottom:20px">
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:6px">Question</label>
+        <input id="ev-question" placeholder="e.g. What is Retrieval Augmented Generation?"
+          style="width:100%;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;box-sizing:border-box" />
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:6px">Generated Answer</label>
+        <textarea id="ev-answer" rows="3" placeholder="Paste the answer your RAG pipeline produced..."
+          style="width:100%;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;resize:vertical;box-sizing:border-box"></textarea>
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:6px">Retrieved Context Chunks (one per line)</label>
+        <textarea id="ev-contexts" rows="5" placeholder="Paste each retrieved context chunk on a new line..."
+          style="width:100%;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;resize:vertical;box-sizing:border-box"></textarea>
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:6px">Ground Truth Answer <span style="font-weight:400;color:var(--muted)">(optional — enables Correctness score)</span></label>
+        <input id="ev-groundtruth" placeholder="The ideal correct answer (leave blank to skip)"
+          style="width:100%;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;box-sizing:border-box" />
+      </div>
+    </div>
+
+    <button onclick="runEval()" style="background:var(--blue);color:#fff;border:none;border-radius:8px;padding:10px 24px;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:24px">
+      Run Evaluation
+    </button>
+
+    <div id="eval-result" style="display:none">
+      <!-- scores injected here -->
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:24px">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px">
+        <div style="font-size:11px;font-weight:700;color:var(--blue);text-transform:uppercase;margin-bottom:6px">Faithfulness</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.6">Is the answer grounded in the retrieved context? Penalises hallucinations — any claim not found in the chunks.</div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px">
+        <div style="font-size:11px;font-weight:700;color:var(--purple);text-transform:uppercase;margin-bottom:6px">Answer Relevancy</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.6">Does the answer actually address the question? High score = on-topic and complete. Low score = off-topic or evasive.</div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px">
+        <div style="font-size:11px;font-weight:700;color:var(--green);text-transform:uppercase;margin-bottom:6px">Context Utilization</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.6">Did the retrieved chunks contain what was needed? Low score = retrieval failure — wrong chunks were fetched.</div>
+      </div>
+    </div>
+  </div>
+</div>

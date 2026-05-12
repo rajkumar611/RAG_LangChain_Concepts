@@ -1,0 +1,64 @@
+<div style="flex:1;overflow-y:auto">
+  <div style="max-width:760px;margin:0 auto;padding:40px 32px 56px;width:100%">
+
+    <!-- What is RAG -->
+    <div style="margin-bottom:32px">
+      <div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--blue);margin-bottom:10px">What is RAG?</div>
+      <h2 style="font-size:22px;font-weight:800;letter-spacing:-0.3px;color:var(--text);margin-bottom:14px">Retrieval-Augmented Generation</h2>
+      <p style="font-size:14px;color:var(--muted);line-height:1.85;margin:0 0 12px">
+        RAG is a technique that improves the accuracy of AI-generated answers by giving the model access to relevant information at the time of answering. Instead of relying purely on what was learned during training, the system first <strong style="color:var(--text)">retrieves</strong> the most relevant chunks from a document or knowledge base, then <strong style="color:var(--text)">augments</strong> the prompt with that context before asking the model to <strong style="color:var(--text)">generate</strong> a response.
+      </p>
+      <p style="font-size:14px;color:var(--muted);line-height:1.85;margin:0">
+        This makes RAG especially useful when you need answers grounded in specific documents — internal reports, product manuals, research papers — rather than general world knowledge. The model does not need to be retrained; you simply change what gets retrieved.
+      </p>
+    </div>
+
+    <!-- How it works -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-bottom:32px">
+      <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px">How it works — the core pipeline</div>
+      <div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px">
+        <div style="background:var(--bg);border:1px solid var(--blue);color:var(--blue);border-radius:6px;padding:7px 14px;font-size:14px;font-weight:600">User Question</div>
+        <span style="color:var(--muted)">→</span>
+        <div style="background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:7px 14px;font-size:14px;font-weight:600">Embed Query</div>
+        <span style="color:var(--muted)">→</span>
+        <div style="background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:7px 14px;font-size:14px;font-weight:600">Search Document Store</div>
+        <span style="color:var(--muted)">→</span>
+        <div style="background:var(--bg);border:1px solid var(--purple);color:var(--purple);border-radius:6px;padding:7px 14px;font-size:14px;font-weight:600">Retrieved Chunks</div>
+        <span style="color:var(--muted)">→</span>
+        <div style="background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:7px 14px;font-size:14px;font-weight:600">Augmented Prompt</div>
+        <span style="color:var(--muted)">→</span>
+        <div style="background:var(--bg);border:1px solid var(--green);color:var(--green);border-radius:6px;padding:7px 14px;font-size:14px;font-weight:600">LLM Answer</div>
+      </div>
+    </div>
+
+    <!-- Who decides -->
+    <div style="margin-bottom:28px">
+      <div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--blue);margin-bottom:10px">Who Decides Which RAG Strategy to Use?</div>
+      <p style="font-size:14px;color:var(--muted);line-height:1.85;margin:0">
+        The developer who builds the RAG system decides which strategy to use. When a developer writes the code, they choose every step — how to chunk, how to embed, how to retrieve. This is done through code or configuration files, not through chat commands. If a company uses a platform like Azure or AWS, their technical team sets it through platform settings. If you are an end user of a finished product like a chatbot, the decision was already made for you before you even opened the application. <strong style="color:var(--text)">You as an end user have no control over it — the pipeline is fixed at build time, not at runtime.</strong>
+      </p>
+    </div>
+
+    <!-- Strategies not rigid -->
+    <div style="margin-bottom:36px">
+      <div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--purple);margin-bottom:10px">Strategies Are Not Rigid Boxes</div>
+      <p style="font-size:14px;color:var(--muted);line-height:1.85;margin:0">
+        Importantly, it is not always one pure strategy. A developer can mix techniques from both. For example, a system might use fixed-size chunking from Naive RAG, but add hybrid search and re-ranking from Advanced RAG. Another system might use semantic chunking and multiple vectors, but skip post-retrieval compression to keep response times fast. <strong style="color:var(--text)">Naive RAG and Advanced RAG are not two rigid boxes — they are a collection of individual techniques</strong>, and developers pick and combine them based on their specific needs, budget, and performance requirements.
+      </p>
+    </div>
+
+    <!-- Nav buttons -->
+    <div style="display:flex;gap:12px;flex-wrap:wrap;padding-top:4px;border-top:1px solid var(--border);">
+      <button onclick="showRAG()" style="display:inline-flex;align-items:center;gap:8px;background:var(--blue);border:none;border-radius:8px;color:#fff;font:600 13px inherit;padding:10px 20px;cursor:pointer;transition:opacity .15s;margin-top:20px" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+        Explore RAG Strategies →
+      </button>
+      <button onclick="showEval()" style="display:inline-flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font:600 13px inherit;padding:10px 20px;cursor:pointer;transition:border-color .15s;margin-top:20px" onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'">
+        Try RAG Evaluation
+      </button>
+      <button onclick="showLangchain()" style="display:inline-flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font:600 13px inherit;padding:10px 20px;cursor:pointer;transition:border-color .15s;margin-top:20px" onmouseover="this.style.borderColor='var(--purple)'" onmouseout="this.style.borderColor='var(--border)'">
+        LangChain Patterns
+      </button>
+    </div>
+
+  </div>
+</div>

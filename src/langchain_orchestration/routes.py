@@ -1,7 +1,6 @@
 import ast
 import logging
 import operator as op
-import os
 import re
 
 from fastapi import APIRouter
@@ -56,6 +55,24 @@ def _safe_eval_math(node: ast.expr) -> float:
     if isinstance(node, ast.UnaryOp) and type(node.op) in _ALLOWED_OPS:
         return _ALLOWED_OPS[type(node.op)](_safe_eval_math(node.operand))
     raise ValueError(f"Unsupported operation: {ast.dump(node)}")
+
+
+def _make_calculator_tool():
+    """Return a LangChain calculator tool with safe AST-based math evaluation."""
+    from langchain_core.tools import tool
+
+    @tool
+    def calculator(expression: str) -> str:
+        """Evaluate a maths expression, e.g. '25 * 4 + 10'."""
+        if not re.fullmatch(r"[\d\s\+\-\*\/\(\)\.\^]+", expression):
+            return "Error: only numeric expressions are supported."
+        try:
+            tree = ast.parse(expression, mode="eval")
+            return str(round(_safe_eval_math(tree.body), 10))
+        except Exception as e:
+            return f"Error: {e}"
+
+    return calculator
 
 
 # ── 1. Prompt Management ──────────────────────────────────────────────────────
@@ -244,16 +261,7 @@ def lc_tools(req: QuestionRequest):
         from langchain_core.prompts import ChatPromptTemplate
         from langchain_core.output_parsers import StrOutputParser
 
-        @tool
-        def calculator(expression: str) -> str:
-            """Evaluate a maths expression, e.g. '25 * 4 + 10'."""
-            if not re.fullmatch(r"[\d\s\+\-\*\/\(\)\.\^]+", expression):
-                return "Error: only numeric expressions are supported."
-            try:
-                tree = ast.parse(expression, mode="eval")
-                return str(round(_safe_eval_math(tree.body), 10))
-            except Exception as e:
-                return f"Error: {e}"
+        calculator = _make_calculator_tool()
 
         @tool
         def get_weather(city: str) -> str:
@@ -383,16 +391,7 @@ def lc_agent_ep(req: QuestionRequest):
         from langchain_core.messages import AIMessage, ToolMessage
         from langgraph.prebuilt import create_react_agent
 
-        @tool
-        def calculator(expression: str) -> str:
-            """Evaluate a maths expression, e.g. '100 * 1.35'."""
-            if not re.fullmatch(r"[\d\s\+\-\*\/\(\)\.\^]+", expression):
-                return "Error: only numeric expressions are supported."
-            try:
-                tree = ast.parse(expression, mode="eval")
-                return str(round(_safe_eval_math(tree.body), 10))
-            except Exception as e:
-                return f"Error: {e}"
+        calculator = _make_calculator_tool()
 
         @tool
         def get_exchange_rate(currency_pair: str) -> str:

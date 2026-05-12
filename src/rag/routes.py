@@ -56,7 +56,7 @@ class EvaluationRequest(BaseModel):
 
 # ── Shared utilities ──────────────────────────────────────────────────────────
 def rebuild_indexes(docs: list[str]) -> None:
-    """Rebuild FAISS embeddings, TF-IDF matrix, and sequential graph from a new doc list.
+    """Rebuild vector embeddings, TF-IDF matrix, and sequential graph from a new doc list.
 
     Mutates the module-level globals DOCS, DOC_EMBS, TFIDF_MAT, and G.
     Call this after every successful upload.
@@ -223,8 +223,9 @@ def advanced_rag(q: QueryRequest):
     """
     if not DOCS:
         return no_docs_response()
-    steps = []
+
     try:
+        steps = []
         rewritten = llm(
             f"Rewrite this query to be specific and retrieval-optimized. "
             f"Return ONLY the rewritten query.\n\nOriginal: {q.query}",
@@ -368,9 +369,9 @@ def hybrid_rag(q: QueryRequest):
     """
     if not DOCS:
         return no_docs_response()
-    steps = []
 
     try:
+        steps = []
         vector_results = vector_search(q.query, k=5)
         steps.append({"step": "1. Dense Retrieval",  "detail": "Semantic vector search → top 5 by cosine similarity"})
 

@@ -1,0 +1,150 @@
+<div style="flex:1;overflow-y:auto">
+  <div style="max-width:800px;margin:0 auto;padding:40px 32px 56px;width:100%">
+
+    <!-- Header -->
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
+      <span style="background:#1e3a5f;color:var(--blue);font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;letter-spacing:.05em">STRATEGY 5 OF 5</span>
+      <span style="background:#78350f22;color:var(--amber);border:1px solid var(--amber);font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;letter-spacing:.05em">Complex Reasoning</span>
+    </div>
+    <h2 style="font-size:28px;font-weight:800;letter-spacing:-0.4px;color:var(--text);margin-bottom:10px">Graph RAG</h2>
+    <p style="font-size:15px;color:var(--muted);line-height:1.8;margin-bottom:32px;max-width:660px">
+      Documents are nodes in a sequential knowledge graph. Retrieval seeds on the best matching chunk, then expands across graph edges using BFS to pull in related context — ideal for multi-hop and relational questions.
+    </p>
+
+    <!-- Pipeline -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;margin-bottom:32px">
+      <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:16px">Pipeline</div>
+      <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px">
+        <div style="background:var(--bg);border:1px solid var(--blue);color:var(--blue);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600">User Question</div>
+        <span style="color:var(--muted);font-size:16px">→</span>
+        <div style="background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600">Seed Retrieval (vector search)</div>
+        <span style="color:var(--muted);font-size:16px">→</span>
+        <div style="background:var(--bg);border:1px solid var(--amber);color:var(--amber);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600">BFS Graph Hop 1</div>
+        <span style="color:var(--muted);font-size:16px">→</span>
+        <div style="background:var(--bg);border:1px solid var(--amber);color:var(--amber);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600">BFS Graph Hop 2</div>
+        <span style="color:var(--muted);font-size:16px">→</span>
+        <div style="background:var(--bg);border:1px solid var(--purple);color:var(--purple);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600">Re-score All Candidates</div>
+        <span style="color:var(--muted);font-size:16px">→</span>
+        <div style="background:var(--bg);border:1px solid var(--green);color:var(--green);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600">LLM Answer</div>
+      </div>
+    </div>
+
+    <!-- How it works -->
+    <div style="margin-bottom:32px">
+      <div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--blue);margin-bottom:12px">How It Works</div>
+      <div style="display:grid;gap:10px">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:12px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Step 1 — Graph Construction</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.75">At upload time, chunks are arranged as nodes in a sequential graph where each node connects to its immediate neighbours — the chunks before and after it in the document. This preserves the document's natural flow and structure without requiring entity extraction or manual annotation.</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:12px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Step 2 — Seed Retrieval</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.75">The user's query is embedded and the top-K most similar chunks are found via vector search. These are the <strong style="color:var(--green)">seed nodes</strong> — the starting points for graph traversal. Seed selection uses cosine similarity, the same as Naive RAG.</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:12px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Step 3 — BFS Expansion</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.75">Starting from the seed nodes, the system traverses the graph via Breadth-First Search to collect neighbouring chunks. This brings in surrounding context — the passage before and after each seed — that may not have matched the query directly but provides critical continuity.</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:12px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Step 4 — Re-scoring</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.75">All collected chunks (seeds and BFS neighbours) are re-scored against the original query using cosine similarity. The highest-scoring subset is selected. Re-scoring ensures that BFS-expanded context that turns out to be irrelevant is ranked below seed nodes that directly match.</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:12px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Step 5 — LLM Generation</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.75">The final scored chunks are passed to the LLM. The result display shows which nodes were seed nodes (green) and which were BFS-expanded neighbours (grey), giving you visibility into how the graph traversal contributed to the answer.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- When to use / When not to use -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:32px">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px">
+        <div style="font-size:13px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">When to Use It</div>
+        <ul style="font-size:14px;color:var(--muted);line-height:1.8;padding-left:16px;margin:0">
+          <li style="margin-bottom:6px">Questions requiring context around the retrieved passage — what came before or after</li>
+          <li style="margin-bottom:6px">Documents with sequential dependencies — reports, manuals, narratives</li>
+          <li>Multi-hop reasoning across related, adjacent sections</li>
+        </ul>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px">
+        <div style="font-size:13px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">When Not to Use It</div>
+        <ul style="font-size:14px;color:var(--muted);line-height:1.8;padding-left:16px;margin:0">
+          <li style="margin-bottom:6px">Documents are unordered collections — FAQs, notes, bullet lists</li>
+          <li style="margin-bottom:6px">Each chunk is fully self-contained — no benefit to reading neighbours</li>
+          <li>You need the fastest possible retrieval with minimal overhead</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Strengths and Limitations -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:32px">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px">
+        <div style="font-size:12px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">Strengths</div>
+        <ul style="font-size:14px;color:var(--muted);line-height:1.8;padding-left:16px;margin:0">
+          <li style="margin-bottom:5px">Retrieves surrounding context automatically — no prompt engineering needed</li>
+          <li style="margin-bottom:5px">Good for documents where meaning spans multiple adjacent passages</li>
+          <li>No extra metadata needed — graph is built from chunk order alone</li>
+        </ul>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px">
+        <div style="font-size:12px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">Limitations</div>
+        <ul style="font-size:14px;color:var(--muted);line-height:1.8;padding-left:16px;margin:0">
+          <li style="margin-bottom:5px">Sequential graph is a simplification — real knowledge graphs use entity extraction</li>
+          <li style="margin-bottom:5px">BFS expansion can bring in irrelevant neighbours near the seed</li>
+          <li>More expensive than naive retrieval — extra graph traversal and re-scoring</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Key concepts -->
+    <div style="margin-bottom:36px">
+      <div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--blue);margin-bottom:12px">Key Concepts</div>
+      <div style="display:grid;gap:10px">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">Sequential Graph <span style="font-size:11px;font-weight:600;color:var(--amber);background:#78350f22;padding:2px 8px;border-radius:999px;margin-left:6px">nodes=chunks · edges=adjacency</span></div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.7">Each document chunk is a node. Edges connect sequential neighbours — chunk 5 connects to chunks 4 and 6. Built with NetworkX. This graph captures the document's linear narrative structure without requiring entity extraction.</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">BFS Expansion <span style="font-size:11px;font-weight:600;color:var(--blue);background:#1e3a5f33;padding:2px 8px;border-radius:999px;margin-left:6px">breadth-first search from seed nodes</span></div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.7">Starting from the seed nodes identified by vector search, Breadth-First Search expands outward to collect all neighbours within a certain hop distance. This brings in the surrounding passage that may not have matched the query directly but provides essential context.</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">Re-scoring <span style="font-size:11px;font-weight:600;color:var(--purple);background:#4c1d9522;padding:2px 8px;border-radius:999px;margin-left:6px">re-rank expanded set by cosine similarity</span></div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.7">After BFS expansion, all candidate chunks — seeds and neighbours — are re-ranked against the original query. This ensures that irrelevant BFS-expanded chunks don't crowd out the most relevant seed nodes in the final context window.</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">NetworkX</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.7">This app uses the <code style="background:var(--bg);padding:1px 6px;border-radius:4px;font-size:12px">networkx</code> Python library to build and traverse the sequential document graph. The global variable <code style="background:var(--bg);padding:1px 6px;border-radius:4px;font-size:12px">G</code> holds the graph, rebuilt on every upload via <code style="background:var(--bg);padding:1px 6px;border-radius:4px;font-size:12px">rebuild_indexes()</code>.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Try it -->
+    <div style="border-top:1px solid var(--border);padding-top:28px">
+      <div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--blue);margin-bottom:6px">Try It</div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Upload a PDF or TXT document first, then ask a question that requires understanding context across multiple adjacent passages. The result shows which nodes were seed nodes and which were BFS-expanded.</p>
+
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius)">
+        <label style="display:inline-flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font:600 13px inherit;padding:7px 14px;cursor:pointer;transition:border-color .15s" onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Upload Document
+          <input type="file" accept=".pdf,.txt" style="display:none" onchange="graphUploadFile(this)">
+        </label>
+        <span id="graph-upload-status" style="font-size:12px;color:var(--muted)">No document loaded</span>
+      </div>
+
+      <textarea id="graph-query" placeholder="e.g. How are the main concepts connected to each other?" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:10px 12px;font:14px inherit;resize:vertical;min-height:72px;outline:none;transition:border-color .15s;box-sizing:border-box" onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+
+      <button onclick="runGraphRAG()" style="margin-top:10px;padding:10px 24px;background:var(--blue);border:none;border-radius:8px;color:#fff;font:600 14px inherit;cursor:pointer;transition:opacity .15s" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+        Run Graph RAG
+      </button>
+
+      <div id="graph-result" style="display:none;margin-top:16px">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Response</div>
+        <div id="graph-answer" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;font-size:13px;color:var(--text);line-height:1.8;white-space:pre-wrap"></div>
+        <div id="graph-nodes" style="margin-top:10px"></div>
+      </div>
+    </div>
+
+  </div>
+</div>

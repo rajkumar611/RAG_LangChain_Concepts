@@ -1,0 +1,149 @@
+<div style="flex:1;overflow-y:auto">
+  <div style="max-width:800px;margin:0 auto;padding:40px 32px 56px;width:100%">
+
+    <!-- Header -->
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
+      <span style="background:#1e3a5f;color:var(--blue);font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;letter-spacing:.05em">STRATEGY 2 OF 5</span>
+    </div>
+    <h2 style="font-size:28px;font-weight:800;letter-spacing:-0.4px;color:var(--text);margin-bottom:10px">Advanced RAG</h2>
+    <p style="font-size:15px;color:var(--muted);line-height:1.8;margin-bottom:32px;max-width:660px">
+      A production-grade pipeline that adds intelligence at every step — structured ingestion, multi-vector indexing, query rewriting, hybrid search, cross-encoder reranking, and answer validation. Each layer addresses a specific failure mode of Naive RAG.
+    </p>
+
+    <!-- Pipeline -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;margin-bottom:32px">
+      <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:16px">Pipeline</div>
+      <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px">
+        <div style="background:var(--bg);border:1px solid var(--blue);color:var(--blue);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600">1. User Question</div>
+        <span style="color:var(--muted);font-size:16px">→</span>
+        <div style="background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600">2. Query Rewrite / Decompose / HyDE</div>
+        <span style="color:var(--muted);font-size:16px">→</span>
+        <div style="background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600">3. Hybrid Search + Metadata Filter</div>
+        <span style="color:var(--muted);font-size:16px">→</span>
+        <div style="background:var(--bg);border:1px solid var(--amber);color:var(--amber);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600">4. Cross-Encoder Rerank</div>
+        <span style="color:var(--muted);font-size:16px">→</span>
+        <div style="background:var(--bg);border:1px solid var(--purple);color:var(--purple);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600">5. Filter · Deduplicate · Compress · Reorder</div>
+        <span style="color:var(--muted);font-size:16px">→</span>
+        <div style="background:var(--bg);border:1px solid var(--green);color:var(--green);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600">6. Structured Prompt → LLM → Validate</div>
+      </div>
+    </div>
+
+    <!-- How it works -->
+    <div style="margin-bottom:32px">
+      <div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--blue);margin-bottom:12px">How It Works</div>
+      <div style="display:grid;gap:10px">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:12px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Step 1 — Document Ingestion</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.75">Text, tables, and images are extracted separately, preserving document structure. A cleaning step removes footers, encoding issues, and boilerplate. Chunking uses <strong style="color:var(--text)">semantic boundaries, sliding window, or parent-child strategies with overlap</strong> — no idea is cut mid-thought. Rich metadata including document name, page number, section, and content type is stored alongside every chunk.</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:12px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Step 2 — Multi-Vector Indexing</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.75">Each chunk receives <strong style="color:var(--text)">multiple embedding vectors</strong> — one for full content, one for a summary, and one for hypothetical questions the chunk can answer. Storage holds all vectors, the raw text, and the complete metadata. This enables retrieval from multiple angles for the same piece of content.</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:12px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Step 3 — Query Processing &amp; Retrieval</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.75">The user's question is first <strong style="color:var(--text)">rewritten, decomposed into sub-questions, or expanded using HyDE</strong> before retrieval. Hybrid search then combines vector similarity and keyword search, with metadata filtering to narrow the candidate pool. A <strong style="color:var(--text)">cross-encoder re-ranker</strong> scores each candidate for precise relevance — unlike the bi-encoder used in indexing, the cross-encoder sees both query and chunk together, making it far more accurate.</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:12px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Step 4 — Post-Processing &amp; Generation</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.75">Before the LLM sees anything, chunks are <strong style="color:var(--text)">filtered by relevance threshold, deduplicated, compressed</strong> to extract only relevant sentences, and reordered so the most relevant content sits at the strongest attention positions in the context window. The prompt is structured with source citations. A final validation step checks the answer for faithfulness and completeness against the retrieved evidence.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- When to use / When not to use -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:32px">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px">
+        <div style="font-size:13px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">When to Use It</div>
+        <ul style="font-size:14px;color:var(--muted);line-height:1.8;padding-left:16px;margin:0">
+          <li style="margin-bottom:6px">Large, complex documents with mixed content — tables, images, varied formats</li>
+          <li style="margin-bottom:6px">Users ask vague, multi-part, or domain-specific questions</li>
+          <li style="margin-bottom:6px">Answer accuracy and reliability are non-negotiable</li>
+          <li>Production systems with real users in high-stakes environments</li>
+        </ul>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px">
+        <div style="font-size:13px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">When Not to Use It</div>
+        <ul style="font-size:14px;color:var(--muted);line-height:1.8;padding-left:16px;margin:0">
+          <li style="margin-bottom:6px">Building a quick prototype — each step adds latency and cost</li>
+          <li style="margin-bottom:6px">Small, clean, well-structured document sets</li>
+          <li style="margin-bottom:6px">Infrastructure budget is limited</li>
+          <li>Naive RAG has already been tested and proven sufficient</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Strengths and Limitations -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:32px">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px">
+        <div style="font-size:12px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">Strengths</div>
+        <ul style="font-size:14px;color:var(--muted);line-height:1.8;padding-left:16px;margin:0">
+          <li style="margin-bottom:5px">Handles complex, ambiguous, and multi-part questions effectively</li>
+          <li style="margin-bottom:5px">Metadata traceability — every answer can be traced to a source, page, and section</li>
+          <li style="margin-bottom:5px">Reranking ensures only the most relevant context reaches the LLM</li>
+          <li>Answer validation catches hallucinations before they reach the user</li>
+        </ul>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px">
+        <div style="font-size:12px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">Limitations</div>
+        <ul style="font-size:14px;color:var(--muted);line-height:1.8;padding-left:16px;margin:0">
+          <li style="margin-bottom:5px">Significantly more complex to build, tune, and maintain</li>
+          <li style="margin-bottom:5px">Higher latency — multiple LLM calls for rewriting, reranking, and validation</li>
+          <li style="margin-bottom:5px">Greater infrastructure cost — reranker models, multi-vector storage</li>
+          <li>More failure points — each step can introduce its own errors</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Key concepts -->
+    <div style="margin-bottom:36px">
+      <div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--blue);margin-bottom:12px">Key Concepts</div>
+      <div style="display:grid;gap:10px">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">HyDE — Hypothetical Document Embeddings</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.7">Instead of embedding the raw question, the LLM first generates a <em>hypothetical answer</em> to the question. That hypothetical is then embedded and used for retrieval. The idea: a fake but plausible answer is semantically closer to the real stored chunks than a short question would be.</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">Hybrid Search</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.7">Combines <strong style="color:var(--text)">dense retrieval</strong> (vector similarity — good at semantic meaning) with <strong style="color:var(--text)">sparse retrieval</strong> (keyword/BM25 — good at exact terms, names, codes). Results from both are fused using Reciprocal Rank Fusion (RRF), giving the best of both worlds. This app implements hybrid search in the Advanced and Hybrid RAG endpoints.</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">Cross-Encoder Reranking</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.7">The bi-encoder used during indexing encodes query and chunks <em>independently</em> — fast but less accurate. A cross-encoder takes the query and each candidate chunk <em>together</em> as a single input and outputs a precise relevance score. Slower but far more accurate. Common models: Cohere Rerank, BGE Reranker, Jina Reranker, Cross-Encoder models.</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">Sliding Window &amp; Parent-Child Chunking</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.7"><strong style="color:var(--text)">Sliding window</strong> chunking uses overlap between consecutive chunks so no idea is cut at a boundary. <strong style="color:var(--text)">Parent-child</strong> chunking stores small chunks for precise retrieval but also keeps a reference to the larger parent chunk — when a small chunk is retrieved, the full parent is sent to the LLM for richer context.</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">Reciprocal Rank Fusion (RRF)</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.7">A score-free fusion algorithm that merges multiple ranked lists. Each document gets a score of <code style="background:var(--bg);padding:1px 6px;border-radius:4px;font-size:12px">1 / (k + rank)</code> from each list, and the scores are summed. The constant <code style="background:var(--bg);padding:1px 6px;border-radius:4px;font-size:12px">k=60</code> is the standard value. This app uses RRF in both the Advanced and Hybrid RAG endpoints.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Try it -->
+    <div style="border-top:1px solid var(--border);padding-top:28px">
+      <div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--blue);margin-bottom:6px">Try It</div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Upload a PDF or TXT document first, then ask a question to see Advanced RAG in action — query rewriting, hybrid search, LLM reranking, and structured generation all run in sequence.</p>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius)">
+        <label style="display:inline-flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font:600 13px inherit;padding:7px 14px;cursor:pointer;transition:border-color .15s" onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Upload Document
+          <input type="file" accept=".pdf,.txt" style="display:none" onchange="advancedUploadFile(this)">
+        </label>
+        <span id="advanced-upload-status" style="font-size:12px;color:var(--muted)">No document loaded</span>
+      </div>
+      <textarea id="advanced-query" placeholder="e.g. What are the key recommendations in this report?" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:10px 12px;font:14px inherit;resize:vertical;min-height:72px;outline:none;transition:border-color .15s;box-sizing:border-box" onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+      <button onclick="runAdvancedRAG()" style="margin-top:10px;padding:10px 24px;background:var(--blue);border:none;border-radius:8px;color:#fff;font:600 14px inherit;cursor:pointer;transition:opacity .15s" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+        Run Advanced RAG
+      </button>
+      <div id="advanced-result" style="display:none;margin-top:16px">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Response</div>
+        <div id="advanced-answer" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;font-size:13px;color:var(--text);line-height:1.8;white-space:pre-wrap"></div>
+        <div id="advanced-steps" style="margin-top:10px"></div>
+      </div>
+    </div>
+
+  </div>
+</div>

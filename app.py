@@ -8,6 +8,7 @@ import time
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 logging.basicConfig(
     level=logging.INFO,
@@ -31,6 +32,7 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], all
 
 app.include_router(rag_router)
 app.include_router(lc_router)
+app.mount("/pages", StaticFiles(directory="frontend/pages"), name="pages")
 
 
 @app.get("/")

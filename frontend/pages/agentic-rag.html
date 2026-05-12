@@ -1,0 +1,148 @@
+<div style="flex:1;overflow-y:auto">
+  <div style="max-width:800px;margin:0 auto;padding:40px 32px 56px;width:100%">
+
+    <!-- Header -->
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
+      <span style="background:#1e3a5f;color:var(--blue);font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;letter-spacing:.05em">STRATEGY 3 OF 5</span>
+      <span style="background:#ef444422;color:#ef4444;border:1px solid #ef4444;font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;letter-spacing:.05em">Tool-Calling Agent</span>
+    </div>
+    <h2 style="font-size:28px;font-weight:800;letter-spacing:-0.4px;color:var(--text);margin-bottom:10px">Agentic RAG</h2>
+    <p style="font-size:15px;color:var(--muted);line-height:1.8;margin-bottom:32px;max-width:660px">
+      The LLM acts as an agent — it decides if, when, and how many times to search. Multi-hop questions are natural. It's a loop, not a pipeline.
+    </p>
+
+    <!-- Pipeline -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;margin-bottom:32px">
+      <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:16px">Pipeline</div>
+      <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px">
+        <div style="background:var(--bg);border:1px solid var(--blue);color:var(--blue);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600">User Question</div>
+        <span style="color:var(--muted);font-size:16px">→</span>
+        <div style="background:var(--bg);border:1px solid #ef4444;color:#ef4444;border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600">Agent Reasons</div>
+        <span style="color:var(--muted);font-size:16px">→</span>
+        <div style="background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600">search() tool call</div>
+        <span style="color:var(--muted);font-size:16px">→</span>
+        <div style="background:var(--bg);border:1px solid #ef4444;color:#ef4444;border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600">Agent Evaluates</div>
+        <span style="color:var(--muted);font-size:16px">→</span>
+        <div style="background:var(--bg);border:1px solid var(--amber);color:var(--amber);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600">Repeat or Stop</div>
+        <span style="color:var(--muted);font-size:16px">→</span>
+        <div style="background:var(--bg);border:1px solid var(--green);color:var(--green);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600">Final Answer</div>
+      </div>
+    </div>
+
+    <!-- How it works -->
+    <div style="margin-bottom:32px">
+      <div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--blue);margin-bottom:12px">How It Works</div>
+      <div style="display:grid;gap:10px">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:12px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Step 1 — Tool-Calling Setup</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.75">The LLM is given a search tool and instructed to use it to find information. It decides when to call the tool and what query to use. Unlike fixed pipelines, the agent controls both the timing and content of every retrieval step based on what it needs to answer the question.</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:12px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Step 2 — Iterative Retrieval</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.75">After each tool call, the LLM evaluates whether it has enough information. If not, it issues another search with a refined or different query. Up to <code style="background:var(--bg);padding:1px 6px;border-radius:4px;font-size:12px">max_search_rounds</code> iterations. Each round can use a completely different query strategy based on what was learned from the previous round's results.</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:12px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Step 3 — Multi-hop Reasoning</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.75">For complex questions requiring information from multiple sections, the agent naturally chains tool calls without explicit programming. The LLM decides to search for topic A, then based on what it finds, searches for related topic B — making connections a fixed pipeline could never anticipate.</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:12px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Step 4 — Answer Generation</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.75">Once satisfied with its collected evidence, the agent generates a final answer grounded in all retrieved content. The answer synthesises information across multiple retrieval rounds, producing responses that can span topics and draw connections a single-pass retrieval would miss.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- When to use / When not to use -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:32px">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px">
+        <div style="font-size:13px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">When to Use It</div>
+        <ul style="font-size:14px;color:var(--muted);line-height:1.8;padding-left:16px;margin:0">
+          <li style="margin-bottom:6px">Multi-hop questions that require combining evidence from multiple sections</li>
+          <li style="margin-bottom:6px">Open-ended research questions with unpredictable scope</li>
+          <li style="margin-bottom:6px">Questions requiring information from multiple sections of a document</li>
+          <li>When you don't know in advance how many retrieval steps are needed</li>
+        </ul>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px">
+        <div style="font-size:13px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">When Not to Use It</div>
+        <ul style="font-size:14px;color:var(--muted);line-height:1.8;padding-left:16px;margin:0">
+          <li style="margin-bottom:6px">Simple factual lookups — a single-pass RAG is overkill</li>
+          <li style="margin-bottom:6px">Latency-sensitive applications — each tool call adds response time</li>
+          <li>When queries are always predictable — Advanced RAG is cheaper and faster</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Strengths and Limitations -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:32px">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px">
+        <div style="font-size:12px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">Strengths</div>
+        <ul style="font-size:14px;color:var(--muted);line-height:1.8;padding-left:16px;margin:0">
+          <li style="margin-bottom:5px">Naturally handles multi-hop questions without manual pipeline design</li>
+          <li style="margin-bottom:5px">Self-directed — no manual pipeline tuning needed</li>
+          <li>Can refine its search strategy based on intermediate results</li>
+        </ul>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px">
+        <div style="font-size:12px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">Limitations</div>
+        <ul style="font-size:14px;color:var(--muted);line-height:1.8;padding-left:16px;margin:0">
+          <li style="margin-bottom:5px">Non-deterministic — the same question can take different retrieval paths</li>
+          <li style="margin-bottom:5px">Harder to debug and trace than a fixed pipeline</li>
+          <li style="margin-bottom:5px">Cost scales with the number of tool calls made</li>
+          <li>Can loop or over-retrieve if not bounded by a round limit</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Key concepts -->
+    <div style="margin-bottom:36px">
+      <div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--blue);margin-bottom:12px">Key Concepts</div>
+      <div style="display:grid;gap:10px">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">Tool Calling</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.7">The LLM is given a function signature (a search tool) and decides when and how to call it. The function runs on the server, and its result is returned to the LLM as additional context. The LLM never executes code directly — it only requests the call.</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">Agent Loop</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.7">The core pattern is <strong style="color:var(--text)">think → act → observe → think</strong>. The agent thinks about what it needs, calls a tool (act), reads the result (observe), and thinks again about whether it has enough to answer. This loop repeats until the agent is satisfied or hits the round limit.</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">max_search_rounds</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.7">This app limits the number of iterations via config (default 2) to bound cost and latency. Without a cap, a poorly-specified question could cause the agent to loop indefinitely, burning API budget. The limit is a safety valve — most well-formed questions resolve in 1–2 rounds.</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">Implementation in This App</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.7">This app uses <code style="background:var(--bg);padding:1px 6px;border-radius:4px;font-size:12px">claude-sonnet-4-6</code> directly via the Anthropic SDK. The agent is implemented using Anthropic's native tool-calling API — no LangChain or framework is used in the RAG module.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Try it -->
+    <div style="border-top:1px solid var(--border);padding-top:28px">
+      <div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--blue);margin-bottom:6px">Try It</div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Upload a PDF or TXT document first, then ask a multi-hop question to see Agentic RAG in action. The agent will iterate with search tool calls before producing a final answer.</p>
+
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius)">
+        <label style="display:inline-flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font:600 13px inherit;padding:7px 14px;cursor:pointer;transition:border-color .15s" onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Upload Document
+          <input type="file" accept=".pdf,.txt" style="display:none" onchange="agenticUploadFile(this)">
+        </label>
+        <span id="agentic-upload-status" style="font-size:12px;color:var(--muted)">No document loaded</span>
+      </div>
+
+      <textarea id="agentic-query" placeholder="e.g. What are all the risks mentioned and how are they addressed?" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:10px 12px;font:14px inherit;resize:vertical;min-height:72px;outline:none;transition:border-color .15s;box-sizing:border-box" onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+
+      <button onclick="runAgenticRAG()" style="margin-top:10px;padding:10px 24px;background:var(--blue);border:none;border-radius:8px;color:#fff;font:600 14px inherit;cursor:pointer;transition:opacity .15s" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+        Run Agentic RAG
+      </button>
+
+      <div id="agentic-result" style="display:none;margin-top:16px">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Response</div>
+        <div id="agentic-answer" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;font-size:13px;color:var(--text);line-height:1.8;white-space:pre-wrap"></div>
+        <div id="agentic-steps" style="margin-top:10px"></div>
+      </div>
+    </div>
+
+  </div>
+</div>

@@ -3,7 +3,7 @@ Integration tests for RAG API endpoints.
 LLM calls are mocked so tests run without an Anthropic API key or network.
 """
 import json
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 import pytest
 import os
 
