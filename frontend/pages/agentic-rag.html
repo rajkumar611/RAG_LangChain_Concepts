@@ -14,16 +14,33 @@
     <!-- Pipeline -->
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;margin-bottom:32px">
       <div style="font-size:17px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:16px">Pipeline</div>
+
+      <!-- Ingestion phase -->
+      <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px">Ingestion (Offline)</div>
+      <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:16px">
+        <div style="background:var(--bg);border:1px solid var(--blue);color:var(--blue);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600">Raw Documents</div>
+        <span style="color:var(--muted);font-size:13px">→</span>
+        <div style="background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600">Chunk + Metadata</div>
+        <span style="color:var(--muted);font-size:13px">→</span>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="background:var(--bg);border:1px solid var(--blue);color:var(--blue);border-radius:6px;padding:5px 12px;font-size:13px;font-weight:600">Vector DB</div>
+          <div style="background:var(--bg);border:1px solid var(--amber);color:var(--amber);border-radius:6px;padding:5px 12px;font-size:13px;font-weight:600">Keyword Index</div>
+          <div style="background:var(--bg);border:1px solid var(--purple);color:var(--purple);border-radius:6px;padding:5px 12px;font-size:13px;font-weight:600">Graph DB (opt.)</div>
+        </div>
+      </div>
+
+      <!-- Query time phase -->
+      <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px">Query Time — Agent Loop (Online)</div>
       <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px">
         <div style="background:var(--bg);border:1px solid var(--blue);color:var(--blue);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600">User Question</div>
         <span style="color:var(--muted);font-size:13px">→</span>
-        <div style="background:var(--bg);border:1px solid #ef4444;color:#ef4444;border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600">Agent Reasons</div>
+        <div style="background:var(--bg);border:1px solid #ef4444;color:#ef4444;border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600">Agent Plans</div>
         <span style="color:var(--muted);font-size:13px">→</span>
-        <div style="background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600">search() tool call</div>
+        <div style="background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600">Tool Call</div>
         <span style="color:var(--muted);font-size:13px">→</span>
-        <div style="background:var(--bg);border:1px solid #ef4444;color:#ef4444;border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600">Agent Evaluates</div>
-        <span style="color:var(--muted);font-size:13px">→</span>
-        <div style="background:var(--bg);border:1px solid var(--amber);color:var(--amber);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600">Repeat or Stop</div>
+        <div style="background:var(--bg);border:1px solid #ef4444;color:#ef4444;border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600">Reflect</div>
+        <span style="color:var(--amber);font-size:13px;font-weight:700">⟳ loop</span>
+        <div style="background:var(--bg);border:1px solid var(--amber);color:var(--amber);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600">Context Assembly</div>
         <span style="color:var(--muted);font-size:13px">→</span>
         <div style="background:var(--bg);border:1px solid var(--green);color:var(--green);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600">Final Answer</div>
       </div>
@@ -49,6 +66,252 @@
           <div style="font-size:13px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Step 4 — Answer Generation</div>
           <div style="font-size:14px;color:var(--muted);line-height:1.75">Once satisfied with its collected evidence, the agent generates a final answer grounded in all retrieved content. The answer synthesises information across multiple retrieval rounds, producing responses that can span topics and draw connections a single-pass retrieval would miss.</div>
         </div>
+      </div>
+    </div>
+
+    <!-- Full Pipeline Walkthrough -->
+    <div style="margin-bottom:32px">
+      <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--blue);margin-bottom:12px">Full Pipeline — Step by Step</div>
+      <div style="display:grid;gap:10px">
+
+        <!-- Ingestion label -->
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;padding:6px 0 2px">Ingestion Phase (Offline)</div>
+
+        <!-- Step 1: Ingestion -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:13px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Step 1 — Document Ingestion</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.75;margin-bottom:10px">Same sources as other RAG systems. The difference in Agentic RAG is not how documents are ingested — it is how they are retrieved at query time.</div>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:13px;font-family:monospace;color:var(--muted);line-height:1.9">
+            <span style="color:var(--blue);font-weight:700">Example document chunk:</span><br>
+            "Company policy states that refund requests must be processed within 7 days."
+          </div>
+        </div>
+
+        <!-- Step 2: Chunking + metadata -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:13px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Step 2 — Chunking &amp; Metadata Enrichment</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.75;margin-bottom:10px">Agentic RAG uses semantic or sentence-aware chunking (same as Advanced RAG) and attaches rich metadata — because the agent may use metadata fields as routing signals when selecting tools.</div>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:13px;font-family:monospace;color:var(--muted);line-height:1.9">
+            {<br>
+            &nbsp;&nbsp;<span style="color:#3b82f6">"source"</span>: <span style="color:var(--amber)">"refund_policy.pdf"</span>,<br>
+            &nbsp;&nbsp;<span style="color:#3b82f6">"section"</span>: <span style="color:var(--amber)">"Return &amp; Refund"</span>,<br>
+            &nbsp;&nbsp;<span style="color:#3b82f6">"topic"</span>: <span style="color:var(--amber)">"policy"</span>,<br>
+            &nbsp;&nbsp;<span style="color:#3b82f6">"chunk_id"</span>: <span style="color:var(--green)">17</span><br>
+            }
+          </div>
+        </div>
+
+        <!-- Step 3: Multi-system storage -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:13px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Step 3 — Multi-System Storage: A Toolbox of Retrievers</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.75;margin-bottom:12px">Unlike Naive RAG (vector only) or even Hybrid RAG (vector + BM25), Agentic RAG does not commit to one retrieval method. It maintains a <strong style="color:var(--text)">toolbox</strong> — the agent picks the right tool for each sub-question.</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+            <div style="background:#1e3a5f33;border:1px solid #3b82f644;border-radius:8px;padding:10px 12px">
+              <div style="font-size:13px;font-weight:700;color:#3b82f6;margin-bottom:6px">Vector DB</div>
+              <div style="font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:4px">Semantic similarity search.</div>
+              <div style="font-size:12px;color:var(--muted)">Pinecone · Weaviate · Milvus</div>
+            </div>
+            <div style="background:#78350f22;border:1px solid #f59e0b44;border-radius:8px;padding:10px 12px">
+              <div style="font-size:13px;font-weight:700;color:var(--amber);margin-bottom:6px">Keyword Index</div>
+              <div style="font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:4px">Lexical / exact match.</div>
+              <div style="font-size:12px;color:var(--muted)">Elasticsearch · BM25</div>
+            </div>
+            <div style="background:#1e1040;border:1px solid #a855f744;border-radius:8px;padding:10px 12px">
+              <div style="font-size:13px;font-weight:700;color:var(--purple);margin-bottom:6px">Graph DB (optional)</div>
+              <div style="font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:4px">Relationship traversal.</div>
+              <div style="font-size:12px;color:var(--muted)">Neo4j · entity links</div>
+            </div>
+          </div>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--muted);margin-top:10px">
+            External APIs (CRM systems, ticketing tools, SQL databases) can also be registered as tools — the agent calls them the same way it calls a retriever.
+          </div>
+        </div>
+
+        <!-- Query time label -->
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;padding:6px 0 2px;margin-top:4px">Query Time Phase — Agent Loop (Online)</div>
+
+        <!-- Step 4: User query + planning -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:13px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Step 4 — User Query Arrives &amp; Agent Plans</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.75;margin-bottom:10px">This is the <strong style="color:var(--text)">core difference</strong> from all other RAG types. Instead of immediately retrieving documents, an LLM acts as a <em>controller</em> that first analyses the question and builds a retrieval plan.</div>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:13px;font-family:monospace;color:var(--muted);line-height:1.9;margin-bottom:10px">
+            <span style="color:var(--blue);font-weight:700">User query:</span> "Can I get a refund if I cancel after 10 days?"<br><br>
+            <span style="color:#ef4444;font-weight:700">Agent reasoning:</span><br>
+            This question involves:<br>
+            - policy rules (factual retrieval needed)<br>
+            - a time condition (10 days vs policy limit)<br>
+            - requires comparing user situation to policy<br><br>
+            <span style="color:var(--green);font-weight:700">Plan:</span><br>
+            Step 1: Search refund policy documents<br>
+            Step 2: Check time constraints section<br>
+            Step 3: Validate eligibility condition<br>
+            Step 4: Synthesise answer
+          </div>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--muted)">
+            No other RAG type does this. Naive, Hybrid, and Advanced RAG go straight from query to retrieval. The agent <strong style="color:var(--text)">thinks before it retrieves</strong>.
+          </div>
+        </div>
+
+        <!-- Step 5: Tool selection -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:13px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Step 5 — Tool Selection</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.75;margin-bottom:12px">The agent does not always use the same retrieval method. It selects the tool best suited to the sub-question at hand.</div>
+          <div style="display:grid;gap:8px">
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;display:flex;gap:12px;align-items:flex-start">
+              <div style="background:#1e3a5f;color:#3b82f6;font-size:12px;font-weight:700;padding:3px 8px;border-radius:999px;white-space:nowrap;margin-top:2px">Vector search</div>
+              <div style="font-size:13px;color:var(--muted);line-height:1.7">Semantic similarity — best for conceptual questions ("explain...", "how does...", "what is...")</div>
+            </div>
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;display:flex;gap:12px;align-items:flex-start">
+              <div style="background:#78350f22;color:var(--amber);font-size:12px;font-weight:700;padding:3px 8px;border-radius:999px;white-space:nowrap;margin-top:2px;border:1px solid #f59e0b44">Keyword search</div>
+              <div style="font-size:13px;color:var(--muted);line-height:1.7">Exact match — best for policy lookups, error codes, named entities ("7 days", "clause 4.2")</div>
+            </div>
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;display:flex;gap:12px;align-items:flex-start">
+              <div style="background:#1e1040;color:var(--purple);font-size:12px;font-weight:700;padding:3px 8px;border-radius:999px;white-space:nowrap;margin-top:2px;border:1px solid #a855f744">Graph search</div>
+              <div style="font-size:13px;color:var(--muted);line-height:1.7">Relationship reasoning — "what does refund policy link to?" → Terms &amp; Conditions → constraint lookup</div>
+            </div>
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;display:flex;gap:12px;align-items:flex-start">
+              <div style="background:#14532d22;color:var(--green);font-size:12px;font-weight:700;padding:3px 8px;border-radius:999px;white-space:nowrap;margin-top:2px;border:1px solid #22c55e44">External API</div>
+              <div style="font-size:13px;color:var(--muted);line-height:1.7">CRM, ticketing systems, SQL databases — any registered callable function</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 6: Reflection loop -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:13px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Step 6 — First Retrieval Call + Reflection Loop</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.75;margin-bottom:12px">The agent issues its first tool call, reads the results, and <strong style="color:var(--text)">reflects</strong>: do I have enough information to answer? If not, it refines the query and calls again. This is not a pipeline — it is a loop.</div>
+
+          <!-- Loop diagram -->
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:12px">
+            <div style="font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">Think → Act → Observe cycle</div>
+            <div style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-family:monospace;color:var(--muted);line-height:1.9">
+              <div><span style="color:#ef4444;font-weight:700">THINK:</span> "Need to find the refund time limit."</div>
+              <div style="padding-left:12px">↓</div>
+              <div><span style="color:#3b82f6;font-weight:700">ACT:</span> vector_search("refund policy cancellation days")</div>
+              <div style="padding-left:12px">↓</div>
+              <div><span style="color:var(--green);font-weight:700">OBSERVE:</span> Returns Chunk A (refund rules) + Chunk B (cancellation section)</div>
+              <div style="padding-left:12px">↓</div>
+              <div><span style="color:#ef4444;font-weight:700">THINK:</span> "I have the policy. Do I know the 10-day condition explicitly?"</div>
+              <div style="padding-left:12px">↓ <span style="color:var(--amber)">→ need more info, loop again</span></div>
+              <div><span style="color:#3b82f6;font-weight:700">ACT:</span> keyword_search("10 days refund eligibility")</div>
+              <div style="padding-left:12px">↓</div>
+              <div><span style="color:var(--green);font-weight:700">OBSERVE:</span> Returns exact clause: "refunds only within 7 days"</div>
+              <div style="padding-left:12px">↓</div>
+              <div><span style="color:#ef4444;font-weight:700">THINK:</span> "I now have enough. Ready to answer." <span style="color:var(--green)">→ exit loop</span></div>
+            </div>
+          </div>
+
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--muted)">
+            <strong style="color:var(--text)">This app</strong> bounds the loop to <code style="background:var(--surface);padding:1px 6px;border-radius:4px">max_search_rounds</code> iterations (default: 2) to control cost and latency. Without a cap, a poorly-specified question could cause the agent to loop indefinitely.
+          </div>
+        </div>
+
+        <!-- Step 7: Context assembly + final reasoning -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:13px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Step 7 — Context Assembly &amp; Final Reasoning</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.75;margin-bottom:12px">Unlike fixed pipelines where retrieved chunks go directly to the LLM, the agent <strong style="color:var(--text)">decides what context is useful</strong>. It may discard irrelevant chunks, re-rank internally, or summarise intermediate findings before producing the final answer.</div>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:13px;font-family:monospace;color:var(--muted);line-height:1.9;margin-bottom:10px">
+            <span style="color:#ef4444;font-weight:700">Agent final reasoning:</span><br>
+            User cancelled after 10 days.<br>
+            Policy allows refunds only within 7 days.<br>
+            10 &gt; 7 → condition NOT met.<br>
+            → <span style="color:var(--green)">Not eligible for refund.</span>
+          </div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:10px">A self-verification step may follow — the agent checks whether it used the correct policy clause, whether the answer is grounded, and whether another retrieval step is needed before sending the final response.</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div style="background:#14532d22;border:1px solid #22c55e44;border-radius:8px;padding:10px 12px">
+              <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:6px">Self-verification checks</div>
+              <ul style="font-size:13px;color:var(--muted);line-height:1.8;padding-left:16px;margin:0">
+                <li>"Did I use the correct policy?"</li>
+                <li>"Is the answer grounded in retrieved text?"</li>
+                <li>"Do I need another retrieval step?"</li>
+              </ul>
+            </div>
+            <div style="background:#1e1040;border:1px solid #a855f744;border-radius:8px;padding:10px 12px">
+              <div style="font-size:13px;font-weight:700;color:var(--purple);margin-bottom:6px">Agent-controlled context</div>
+              <ul style="font-size:13px;color:var(--muted);line-height:1.8;padding-left:16px;margin:0">
+                <li>Discards irrelevant chunks</li>
+                <li>Re-ranks internally by usefulness</li>
+                <li>Summarises intermediate results</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Final mental model -->
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-top:10px">
+        <div style="font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Mental Model — Agentic RAG in One Line</div>
+        <div style="font-size:15px;color:var(--text);font-style:italic;margin-bottom:16px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px">"RAG with a reasoning agent that decides <em>how</em> to retrieve, not just <em>what</em> to retrieve."</div>
+        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:0;font-size:13px;font-family:monospace;color:var(--muted);line-height:2">
+          <div><span style="color:var(--blue);font-weight:700">INGESTION</span></div>
+          <div style="margin-left:10px">Chunking + Metadata</div>
+          <div style="margin-left:10px">↓</div>
+          <div style="margin-left:10px"><span style="color:#3b82f6">Vector DB</span> + <span style="color:var(--amber)">Keyword Index</span> + <span style="color:var(--purple)">Graph DB</span></div>
+          <div style="margin-left:60px">↓</div>
+          <div><span style="color:var(--blue);font-weight:700">QUERY TIME</span></div>
+          <div style="margin-left:10px">User Query</div>
+          <div style="margin-left:10px">↓</div>
+          <div style="margin-left:10px"><span style="color:#ef4444;font-weight:700">LLM Agent (Planner)</span> — analyses, decomposes, builds retrieval plan</div>
+          <div style="margin-left:10px">↓</div>
+          <div style="margin-left:10px">Tool Calls (loop until satisfied or max rounds):</div>
+          <div style="margin-left:30px">├── <span style="color:#3b82f6">Vector Search</span></div>
+          <div style="margin-left:30px">├── <span style="color:var(--amber)">Keyword Search</span></div>
+          <div style="margin-left:30px">├── <span style="color:var(--purple)">Graph Search</span></div>
+          <div style="margin-left:30px">└── <span style="color:var(--green)">External APIs</span></div>
+          <div style="margin-left:10px">↓</div>
+          <div style="margin-left:10px">Reflection — enough info? <span style="color:var(--amber)">⟳ if not, refine &amp; repeat</span></div>
+          <div style="margin-left:10px">↓</div>
+          <div style="margin-left:10px">Context Assembly (agent-controlled)</div>
+          <div style="margin-left:10px">↓</div>
+          <div style="margin-left:10px">Final Reasoning + Self-Verification</div>
+          <div style="margin-left:10px">↓</div>
+          <div style="margin-left:10px"><span style="color:var(--green);font-weight:700">Answer</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Agentic vs other RAG comparison -->
+    <div style="margin-bottom:32px">
+      <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--blue);margin-bottom:12px">Agentic RAG vs Other RAG Types</div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+          <thead>
+            <tr style="background:#1e3a5f">
+              <th style="padding:10px 14px;text-align:left;color:var(--muted);font-weight:700;border:1px solid var(--border)">Type</th>
+              <th style="padding:10px 14px;text-align:left;color:var(--muted);font-weight:700;border:1px solid var(--border)">Retrieval Behaviour</th>
+              <th style="padding:10px 14px;text-align:left;color:var(--muted);font-weight:700;border:1px solid var(--border)">Decision-Making</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border:1px solid var(--border)">
+              <td style="padding:9px 14px;color:var(--text);font-weight:600;border:1px solid var(--border)">Naive RAG</td>
+              <td style="padding:9px 14px;color:var(--muted);border:1px solid var(--border)">Single vector search</td>
+              <td style="padding:9px 14px;color:var(--muted);border:1px solid var(--border)">None — direct similarity lookup</td>
+            </tr>
+            <tr style="background:var(--surface);border:1px solid var(--border)">
+              <td style="padding:9px 14px;color:var(--text);font-weight:600;border:1px solid var(--border)">Hybrid RAG</td>
+              <td style="padding:9px 14px;color:var(--muted);border:1px solid var(--border)">Vector + BM25, always both</td>
+              <td style="padding:9px 14px;color:var(--muted);border:1px solid var(--border)">Fixed — always runs both paths</td>
+            </tr>
+            <tr style="border:1px solid var(--border)">
+              <td style="padding:9px 14px;color:var(--text);font-weight:600;border:1px solid var(--border)">Advanced RAG</td>
+              <td style="padding:9px 14px;color:var(--muted);border:1px solid var(--border)">Multi-stage fixed pipeline</td>
+              <td style="padding:9px 14px;color:var(--muted);border:1px solid var(--border)">Fixed — same steps every time</td>
+            </tr>
+            <tr style="background:var(--surface);border:1px solid var(--border)">
+              <td style="padding:9px 14px;color:var(--text);font-weight:600;border:1px solid var(--border)">Graph RAG</td>
+              <td style="padding:9px 14px;color:var(--muted);border:1px solid var(--border)">Seed + graph traversal</td>
+              <td style="padding:9px 14px;color:var(--muted);border:1px solid var(--border)">Fixed — BFS hops are predetermined</td>
+            </tr>
+            <tr style="border:1px solid #ef444444;background:#2d0a0a">
+              <td style="padding:9px 14px;color:#ef4444;font-weight:700;border:1px solid var(--border)">Agentic RAG</td>
+              <td style="padding:9px 14px;color:var(--text);font-weight:600;border:1px solid var(--border)">Dynamic — picks tool per sub-question</td>
+              <td style="padding:9px 14px;color:var(--green);font-weight:600;border:1px solid var(--border)">Dynamic — agent decides at runtime</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
 

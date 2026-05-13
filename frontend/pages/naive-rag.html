@@ -13,16 +13,33 @@
     <!-- Pipeline -->
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;margin-bottom:32px">
       <div style="font-size:17px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:16px">Pipeline</div>
+
+      <!-- Ingestion phase -->
+      <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px">Ingestion (Offline)</div>
+      <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:16px">
+        <div style="background:var(--bg);border:1px solid var(--blue);color:var(--blue);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600">Raw Documents</div>
+        <span style="color:var(--muted);font-size:13px">→</span>
+        <div style="background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600">Basic Parsing</div>
+        <span style="color:var(--muted);font-size:13px">→</span>
+        <div style="background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600">Fixed-Size Chunking</div>
+        <span style="color:var(--muted);font-size:13px">→</span>
+        <div style="background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600">Embed Chunks</div>
+        <span style="color:var(--muted);font-size:13px">→</span>
+        <div style="background:var(--bg);border:1px solid var(--blue);color:var(--blue);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600">Vector DB only</div>
+      </div>
+
+      <!-- Query time phase -->
+      <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px">Query Time (Online)</div>
       <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px">
-        <div style="background:var(--bg);border:1px solid var(--blue);color:var(--blue);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600">1. User Question</div>
+        <div style="background:var(--bg);border:1px solid var(--blue);color:var(--blue);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600">User Question</div>
         <span style="color:var(--muted);font-size:13px">→</span>
-        <div style="background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600">2. Embed Query</div>
+        <div style="background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600">Embed Query</div>
         <span style="color:var(--muted);font-size:13px">→</span>
-        <div style="background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600">3. Cosine Similarity Search</div>
+        <div style="background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600">Cosine Similarity Search</div>
         <span style="color:var(--muted);font-size:13px">→</span>
-        <div style="background:var(--bg);border:1px solid var(--purple);color:var(--purple);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600">4. Top-K Chunks</div>
+        <div style="background:var(--bg);border:1px solid var(--purple);color:var(--purple);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600">Top-K Chunks</div>
         <span style="color:var(--muted);font-size:13px">→</span>
-        <div style="background:var(--bg);border:1px solid var(--green);color:var(--green);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600">5. LLM Answer</div>
+        <div style="background:var(--bg);border:1px solid var(--green);color:var(--green);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600">LLM Answer</div>
       </div>
     </div>
 
@@ -91,6 +108,277 @@
           <div style="font-size:13px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Step 4 — Generation</div>
           <div style="font-size:14px;color:var(--muted);line-height:1.75">All retrieved chunks are passed to the LLM as-is, without any filtering, deduplication, compression, or reordering. The prompt is unstructured, and no validation is performed on the final answer.</div>
         </div>
+      </div>
+    </div>
+
+    <!-- Full Pipeline Walkthrough -->
+    <div style="margin-bottom:32px">
+      <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--blue);margin-bottom:12px">Full Pipeline — Step by Step</div>
+      <div style="display:grid;gap:10px">
+
+        <!-- Ingestion phase label -->
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;padding:6px 0 2px">Ingestion Phase (Offline)</div>
+
+        <!-- Step 1: Ingestion & Cleaning -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:13px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Step 1 — Document Ingestion &amp; Basic Cleaning</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.75;margin-bottom:10px">Raw documents are loaded and text is extracted with minimal processing. Unlike Advanced RAG, there is no OCR pipeline, no structural separation of tables vs text, and no heavy cleaning pass.</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div>
+              <div style="font-size:13px;font-weight:700;color:#3b82f6;margin-bottom:6px">Input Sources</div>
+              <ul style="font-size:13px;color:var(--muted);line-height:1.8;padding-left:16px;margin:0">
+                <li>PDFs</li>
+                <li>Web pages</li>
+                <li>Notes &amp; internal docs</li>
+              </ul>
+            </div>
+            <div>
+              <div style="font-size:13px;font-weight:700;color:var(--amber);margin-bottom:6px">What gets skipped</div>
+              <ul style="font-size:13px;color:var(--muted);line-height:1.8;padding-left:16px;margin:0">
+                <li>No OCR for scanned docs</li>
+                <li>No footer / boilerplate removal</li>
+                <li>No structural parsing</li>
+                <li>Noise goes straight through</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2: Fixed-size chunking -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:13px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Step 2 — Fixed-Size Chunking</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.75;margin-bottom:10px">Text is split into equal-sized blocks by token or character count. There is no awareness of sentence or paragraph boundaries — the split happens at the character limit, wherever that falls.</div>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:13px;font-family:monospace;color:var(--muted);line-height:1.9;margin-bottom:10px">
+            <span style="color:var(--blue);font-weight:700">Input text:</span><br>
+            "Self-attention allows transformers to model relationships between tokens. It replaces recurrence used in RNNs. Training requires large datasets."<br><br>
+            <span style="color:var(--amber);font-weight:700">Fixed-size output (3 chunks):</span><br>
+            Chunk 1: "Self-attention allows transformers to model relationships between tokens."<br>
+            Chunk 2: "It replaces recurrence used in RNNs."<br>
+            Chunk 3: "Training requires large datasets."
+          </div>
+          <div style="background:#2d1515;border:1px solid #7f1d1d55;border-radius:8px;padding:10px 14px">
+            <div style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:6px">Key limitations of fixed-size chunking</div>
+            <ul style="font-size:13px;color:var(--muted);line-height:1.8;padding-left:16px;margin:0">
+              <li>Chunks may break in the middle of a sentence</li>
+              <li>Unrelated ideas can be grouped in the same chunk if they happen to be nearby</li>
+              <li>No overlap — context that spans two chunks may never be fully retrieved</li>
+              <li>No semantic awareness — topic shifts are invisible to the chunker</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Step 3: Embedding generation -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:13px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Step 3 — Embedding Generation</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.75;margin-bottom:10px">Each chunk is converted into a single embedding vector by the embedding model. This vector captures the semantic meaning of the chunk in high-dimensional space.</div>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:13px;font-family:monospace;color:var(--muted);line-height:1.9">
+            <span style="color:var(--blue);font-weight:700">Chunk:</span><br>
+            "Self-attention allows transformers to model relationships between tokens."<br><br>
+            <span style="color:var(--green);font-weight:700">Embedding (384-dim):</span><br>
+            → [0.21, -0.88, 0.77, 0.12, -0.44, ...]<br><br>
+            <span style="color:var(--muted)">Model used: <strong style="color:var(--text)">all-MiniLM-L6-v2</strong> (same model for chunks and queries)</span>
+          </div>
+        </div>
+
+        <!-- Step 4: Single Storage -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:13px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Step 4 — Single Storage: Vector DB Only</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.75;margin-bottom:12px">This is the <strong style="color:var(--text)">biggest structural difference</strong> from Hybrid and Advanced RAG. Naive RAG uses <strong style="color:var(--text)">one storage system</strong> — the vector database. There is no keyword index, no inverted index, no BM25.</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+            <div style="background:#1e3a5f33;border:1px solid #3b82f644;border-radius:8px;padding:12px 14px">
+              <div style="font-size:13px;font-weight:700;color:#3b82f6;margin-bottom:6px">Vector DB (used)</div>
+              <div style="font-size:13px;color:var(--muted);line-height:1.75;margin-bottom:8px">Stores chunk text + embedding vector. Enables cosine similarity search.</div>
+              <div style="font-size:12px;font-family:monospace;color:var(--muted);line-height:1.9">
+                chunk → [0.21, -0.88, 0.77, ...]<br>
+                → Pinecone / Weaviate / NumPy matrix
+              </div>
+            </div>
+            <div style="background:#2d1515;border:1px solid #7f1d1d44;border-radius:8px;padding:12px 14px">
+              <div style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:6px">Keyword Index (not used)</div>
+              <div style="font-size:13px;color:var(--muted);line-height:1.75;margin-bottom:8px">No inverted index is built. Exact keyword search is not available.</div>
+              <ul style="font-size:13px;color:var(--muted);line-height:1.8;padding-left:16px;margin:0">
+                <li style="color:var(--red)">No BM25</li>
+                <li style="color:var(--red)">No TF-IDF index</li>
+                <li style="color:var(--red)">No inverted index</li>
+              </ul>
+            </div>
+          </div>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:13px;font-family:monospace;color:var(--muted);line-height:1.9">
+            <span style="color:var(--green);font-weight:700">Typical Naive RAG metadata:</span><br>
+            {<br>
+            &nbsp;&nbsp;<span style="color:#3b82f6">"source"</span>: <span style="color:var(--amber)">"doc.pdf"</span>,<br>
+            &nbsp;&nbsp;<span style="color:#3b82f6">"chunk_id"</span>: <span style="color:var(--green)">12</span><br>
+            }<br><br>
+            <span style="color:var(--muted)">No section, topic, year, or page — just a pointer to the source file.</span>
+          </div>
+        </div>
+
+        <!-- Query time label -->
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;padding:6px 0 2px;margin-top:4px">Query Time Phase (Online)</div>
+
+        <!-- Step 5: User query -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:13px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Step 5 — User Query &amp; Query Embedding</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.75;margin-bottom:10px">The raw user question is used <strong style="color:var(--text)">as-is</strong> — no rewriting, no HyDE, no decomposition into sub-questions. It is simply embedded using the same model that encoded the chunks.</div>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:13px;font-family:monospace;color:var(--muted);line-height:1.9;margin-bottom:10px">
+            <span style="color:var(--blue);font-weight:700">Query:</span> "How does self-attention work?"<br><br>
+            <span style="color:var(--green);font-weight:700">Query vector:</span> [0.18, -0.91, 0.74, ...]
+          </div>
+          <div style="background:#2d1515;border:1px solid #7f1d1d55;border-radius:8px;padding:10px 14px">
+            <div style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:4px">What gets skipped at query time</div>
+            <ul style="font-size:13px;color:var(--muted);line-height:1.8;padding-left:16px;margin:0">
+              <li style="color:var(--red)">No query rewriting for better retrieval alignment</li>
+              <li style="color:var(--red)">No HyDE (hypothetical answer generation)</li>
+              <li style="color:var(--red)">No query expansion or multi-query generation</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Step 6: Vector search only -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:13px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Step 6 — Vector Similarity Search Only</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.75;margin-bottom:12px">The query vector is compared against every stored chunk vector using cosine similarity. The top-K highest-scoring chunks are returned. This is the <strong style="color:var(--text)">only retrieval operation</strong> in Naive RAG.</div>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:13px;font-family:monospace;color:var(--muted);line-height:1.9;margin-bottom:12px">
+            query_vector vs chunk_1_vector → similarity: 0.91<br>
+            query_vector vs chunk_2_vector → similarity: 0.74<br>
+            query_vector vs chunk_3_vector → similarity: 0.43<br>
+            query_vector vs chunk_4_vector → similarity: 0.21<br><br>
+            <span style="color:var(--green);font-weight:700">Top 3 returned:</span> chunk_1, chunk_2, chunk_3
+          </div>
+          <div style="background:#2d1515;border:1px solid #7f1d1d55;border-radius:8px;padding:10px 14px;margin-bottom:10px">
+            <div style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:4px">No hybrid retrieval, no fusion, no reranking</div>
+            <ul style="font-size:13px;color:var(--muted);line-height:1.8;padding-left:16px;margin:0">
+              <li style="color:var(--red)">No BM25 / keyword search</li>
+              <li style="color:var(--red)">No RRF fusion</li>
+              <li style="color:var(--red)">No cross-encoder reranking</li>
+              <li style="color:var(--red)">Top-K similarity score is the final ranking — no further quality check</li>
+            </ul>
+          </div>
+          <div style="font-size:13px;color:var(--muted)">This means exact-match queries (error codes, product IDs, named entities) often fail — the vector space may not bring the right chunk to the top if the query wording differs from the chunk wording.</div>
+        </div>
+
+        <!-- Step 7: Prompt & generation -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:13px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Step 7 — Prompt Construction &amp; LLM Generation</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.75;margin-bottom:10px">The top-K chunks are concatenated with the user query and sent directly to the LLM. No filtering, deduplication, compression, or reordering happens first.</div>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:13px;font-family:monospace;color:var(--muted);line-height:1.9;margin-bottom:10px">
+            [System Prompt]<br>
+            +<br>
+            [Chunk 1] "Self-attention allows transformers to model..."<br>
+            [Chunk 2] "It replaces recurrence used in RNNs."<br>
+            [Chunk 3] "Training requires large datasets."<br>
+            +<br>
+            [User Query] "How does self-attention work?"<br><br>
+            <span style="color:var(--green);font-weight:700">→ LLM generates answer</span>
+          </div>
+          <div style="font-size:13px;color:var(--muted)">No answer validation is performed. Hallucinations — where the model generates plausible but unsupported claims — pass through silently.</div>
+        </div>
+
+      </div>
+
+      <!-- Common failure cases -->
+      <div style="background:var(--bg);border:1px solid #7f1d1d55;border-radius:var(--radius);padding:16px 20px;margin-top:10px">
+        <div style="font-size:13px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Common Failure Cases</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div style="font-size:13px;color:var(--muted);line-height:1.75">
+            <div style="font-weight:700;color:var(--text);margin-bottom:4px">Exact match queries</div>
+            Searching for an error code, product ID, or specific name — if the query wording doesn't match the chunk's embedding direction closely, the right chunk won't be in the top-K.
+          </div>
+          <div style="font-size:13px;color:var(--muted);line-height:1.75">
+            <div style="font-weight:700;color:var(--text);margin-bottom:4px">Multi-hop reasoning</div>
+            Questions that require combining information from two separate sections of a document — Naive RAG has no graph expansion or iterative search.
+          </div>
+          <div style="font-size:13px;color:var(--muted);line-height:1.75">
+            <div style="font-weight:700;color:var(--text);margin-bottom:4px">Long docs with mixed topics</div>
+            Fixed-size chunks from a long document mix different topics — unrelated chunks score higher than expected and pollute the context.
+          </div>
+          <div style="font-size:13px;color:var(--muted);line-height:1.75">
+            <div style="font-weight:700;color:var(--text);margin-bottom:4px">Ambiguous queries</div>
+            Without query rewriting or decomposition, vague questions retrieve whatever is semantically closest — often the wrong content.
+          </div>
+        </div>
+      </div>
+
+      <!-- Final mental model -->
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-top:10px">
+        <div style="font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px">Mental Model — Naive RAG in One Line</div>
+        <div style="font-size:15px;color:var(--text);font-style:italic;margin-bottom:16px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px">"Embed everything, then do nearest-neighbour search."</div>
+        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:0;font-size:13px;font-family:monospace;color:var(--muted);line-height:2">
+          <div><span style="color:var(--blue);font-weight:700">INGESTION</span></div>
+          <div style="margin-left:10px">↓</div>
+          <div style="margin-left:10px">Basic chunking (fixed size, no overlap)</div>
+          <div style="margin-left:10px">↓</div>
+          <div style="margin-left:10px">Embeddings → <span style="color:#3b82f6">Vector DB only</span></div>
+          <div style="margin-left:60px">↓</div>
+          <div><span style="color:var(--blue);font-weight:700">QUERY TIME</span></div>
+          <div style="margin-left:10px">User Query (raw, no rewriting)</div>
+          <div style="margin-left:10px">↓</div>
+          <div style="margin-left:10px">Query embedding</div>
+          <div style="margin-left:10px">↓</div>
+          <div style="margin-left:10px"><span style="color:#3b82f6">Vector similarity search only</span> <span style="color:var(--red);font-size:12px">(no keyword search, no fusion, no reranking)</span></div>
+          <div style="margin-left:10px">↓</div>
+          <div style="margin-left:10px">Top-K chunks → Direct LLM prompt</div>
+          <div style="margin-left:10px">↓</div>
+          <div style="margin-left:10px"><span style="color:var(--green);font-weight:700">Answer</span> <span style="color:var(--red);font-size:12px">(no validation)</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Naive vs Advanced comparison -->
+    <div style="margin-bottom:32px">
+      <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--blue);margin-bottom:12px">Naive vs Advanced — Quick Comparison</div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+          <thead>
+            <tr style="background:#1e3a5f">
+              <th style="padding:10px 14px;text-align:left;color:var(--muted);font-weight:700;border:1px solid var(--border)">Feature</th>
+              <th style="padding:10px 14px;text-align:left;color:#3b82f6;font-weight:700;border:1px solid var(--border)">Naive RAG</th>
+              <th style="padding:10px 14px;text-align:left;color:var(--amber);font-weight:700;border:1px solid var(--border)">Advanced RAG</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border:1px solid var(--border)">
+              <td style="padding:9px 14px;color:var(--text);font-weight:600;border:1px solid var(--border)">Chunking</td>
+              <td style="padding:9px 14px;color:var(--muted);border:1px solid var(--border)">Fixed size, no overlap</td>
+              <td style="padding:9px 14px;color:var(--muted);border:1px solid var(--border)">Semantic, sentence-aware, recursive</td>
+            </tr>
+            <tr style="background:var(--surface);border:1px solid var(--border)">
+              <td style="padding:9px 14px;color:var(--text);font-weight:600;border:1px solid var(--border)">Storage</td>
+              <td style="padding:9px 14px;color:var(--red);border:1px solid var(--border)">Vector DB only</td>
+              <td style="padding:9px 14px;color:var(--green);border:1px solid var(--border)">Vector DB + Keyword Index + Metadata</td>
+            </tr>
+            <tr style="border:1px solid var(--border)">
+              <td style="padding:9px 14px;color:var(--text);font-weight:600;border:1px solid var(--border)">Retrieval</td>
+              <td style="padding:9px 14px;color:var(--red);border:1px solid var(--border)">Vector search only</td>
+              <td style="padding:9px 14px;color:var(--green);border:1px solid var(--border)">Hybrid: vector + BM25 keyword</td>
+            </tr>
+            <tr style="background:var(--surface);border:1px solid var(--border)">
+              <td style="padding:9px 14px;color:var(--text);font-weight:600;border:1px solid var(--border)">Fusion</td>
+              <td style="padding:9px 14px;color:var(--red);border:1px solid var(--border)">None</td>
+              <td style="padding:9px 14px;color:var(--green);border:1px solid var(--border)">RRF across vector + keyword results</td>
+            </tr>
+            <tr style="border:1px solid var(--border)">
+              <td style="padding:9px 14px;color:var(--text);font-weight:600;border:1px solid var(--border)">Reranking</td>
+              <td style="padding:9px 14px;color:var(--red);border:1px solid var(--border)">None — similarity score is final</td>
+              <td style="padding:9px 14px;color:var(--green);border:1px solid var(--border)">Cross-encoder reranking</td>
+            </tr>
+            <tr style="background:var(--surface);border:1px solid var(--border)">
+              <td style="padding:9px 14px;color:var(--text);font-weight:600;border:1px solid var(--border)">Query processing</td>
+              <td style="padding:9px 14px;color:var(--red);border:1px solid var(--border)">Raw query used as-is</td>
+              <td style="padding:9px 14px;color:var(--green);border:1px solid var(--border)">Rewriting, HyDE, multi-query expansion</td>
+            </tr>
+            <tr style="border:1px solid var(--border)">
+              <td style="padding:9px 14px;color:var(--text);font-weight:600;border:1px solid var(--border)">Context compression</td>
+              <td style="padding:9px 14px;color:var(--red);border:1px solid var(--border)">None — all chunks passed raw</td>
+              <td style="padding:9px 14px;color:var(--green);border:1px solid var(--border)">Dedup, summarise, reorder</td>
+            </tr>
+            <tr style="background:var(--surface);border:1px solid var(--border)">
+              <td style="padding:9px 14px;color:var(--text);font-weight:600;border:1px solid var(--border)">Accuracy</td>
+              <td style="padding:9px 14px;color:var(--amber);border:1px solid var(--border)">Medium — good enough for simple queries</td>
+              <td style="padding:9px 14px;color:var(--green);border:1px solid var(--border)">High — multiple precision layers</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
