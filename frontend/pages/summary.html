@@ -32,23 +32,7 @@
               <td style="padding:12px 14px;color:var(--muted)">Complex/multi-part questions</td>
             </tr>
             <tr style="border-top:1px solid var(--border)">
-              <td style="padding:12px 14px;font-weight:700;color:#a855f7;white-space:nowrap">2. Advanced RAG</td>
-              <td style="padding:12px 14px;color:var(--muted)">Rewrite / HyDE / decompose</td>
-              <td style="padding:12px 14px;color:var(--muted)">Hybrid + metadata filter</td>
-              <td style="padding:12px 14px;color:var(--green)">LLM cross-encoder</td>
-              <td style="padding:12px 14px;color:var(--muted)">Production, high-stakes</td>
-              <td style="padding:12px 14px;color:var(--muted)">Simple queries, tight budget</td>
-            </tr>
-            <tr style="border-top:1px solid var(--border)">
-              <td style="padding:12px 14px;font-weight:700;color:#ef4444;white-space:nowrap">3. Agentic RAG</td>
-              <td style="padding:12px 14px;color:var(--muted)">Agent decides autonomously</td>
-              <td style="padding:12px 14px;color:var(--muted)">Iterative tool calls</td>
-              <td style="padding:12px 14px;color:var(--amber)">Agent self-evaluates</td>
-              <td style="padding:12px 14px;color:var(--muted)">Multi-hop, open-ended</td>
-              <td style="padding:12px 14px;color:var(--muted)">Latency-sensitive apps</td>
-            </tr>
-            <tr style="border-top:1px solid var(--border)">
-              <td style="padding:12px 14px;font-weight:700;color:#22c55e;white-space:nowrap">4. Hybrid RAG</td>
+              <td style="padding:12px 14px;font-weight:700;color:#22c55e;white-space:nowrap">2. Hybrid RAG</td>
               <td style="padding:12px 14px;color:var(--muted)">Raw query (dual-path)</td>
               <td style="padding:12px 14px;color:var(--muted)">Dense + Sparse (BM25) + RRF</td>
               <td style="padding:12px 14px;color:var(--red)">None (RRF fusion)</td>
@@ -56,12 +40,28 @@
               <td style="padding:12px 14px;color:var(--muted)">Pure narrative docs</td>
             </tr>
             <tr style="border-top:1px solid var(--border)">
-              <td style="padding:12px 14px;font-weight:700;color:#f59e0b;white-space:nowrap">5. Graph RAG</td>
+              <td style="padding:12px 14px;font-weight:700;color:#a855f7;white-space:nowrap">3. Advanced RAG</td>
+              <td style="padding:12px 14px;color:var(--muted)">Rewrite / HyDE / decompose</td>
+              <td style="padding:12px 14px;color:var(--muted)">Hybrid + metadata filter</td>
+              <td style="padding:12px 14px;color:var(--green)">LLM cross-encoder</td>
+              <td style="padding:12px 14px;color:var(--muted)">Production, high-stakes</td>
+              <td style="padding:12px 14px;color:var(--muted)">Simple queries, tight budget</td>
+            </tr>
+            <tr style="border-top:1px solid var(--border)">
+              <td style="padding:12px 14px;font-weight:700;color:#f59e0b;white-space:nowrap">4. Graph RAG</td>
               <td style="padding:12px 14px;color:var(--muted)">Raw query → seed + BFS</td>
               <td style="padding:12px 14px;color:var(--muted)">Vector seed + graph expand</td>
               <td style="padding:12px 14px;color:var(--amber)">Re-score expanded set</td>
               <td style="padding:12px 14px;color:var(--muted)">Sequential, relational docs</td>
               <td style="padding:12px 14px;color:var(--muted)">Unordered, self-contained chunks</td>
+            </tr>
+            <tr style="border-top:1px solid var(--border)">
+              <td style="padding:12px 14px;font-weight:700;color:#ef4444;white-space:nowrap">5. Agentic RAG</td>
+              <td style="padding:12px 14px;color:var(--muted)">Agent decides autonomously</td>
+              <td style="padding:12px 14px;color:var(--muted)">Iterative tool calls</td>
+              <td style="padding:12px 14px;color:var(--amber)">Agent self-evaluates</td>
+              <td style="padding:12px 14px;color:var(--muted)">Multi-hop, open-ended</td>
+              <td style="padding:12px 14px;color:var(--muted)">Latency-sensitive apps</td>
             </tr>
           </tbody>
         </table>
@@ -71,7 +71,7 @@
     <!-- Individual strategy cards -->
     <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--blue);margin-bottom:16px">Strategy Summaries</div>
 
-    <!-- Row 1: Naive + Advanced -->
+    <!-- Row 1: Naive + Hybrid -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
@@ -91,7 +91,28 @@
 
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-          <span style="background:#a855f722;color:#a855f7;border:1px solid #a855f7;border-radius:999px;font-size:17px;font-weight:700;padding:2px 10px">2</span>
+          <span style="background:#22c55e22;color:#22c55e;border:1px solid #22c55e;border-radius:999px;font-size:17px;font-weight:700;padding:2px 10px">2</span>
+          <span style="font-size:13px;font-weight:700">Hybrid RAG</span>
+        </div>
+        <p style="font-size:14px;color:var(--muted);line-height:1.75;margin:0 0 12px">
+          Two searches run in parallel:<br><br>
+          <strong style="color:#3b82f6">Dense search</strong> — finds chunks by meaning (semantic/embeddings)<br>
+          <strong style="color:#f59e0b">Sparse search</strong> — finds chunks by exact keywords (BM25)<br><br>
+          Both results are merged using <strong style="color:var(--text)">RRF</strong>.
+        </p>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          <span style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:3px 10px;font-size:17px;color:var(--muted)">dense + sparse</span>
+          <span style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:3px 10px;font-size:17px;color:var(--muted)">RRF fusion</span>
+          <span style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:3px 10px;font-size:17px;color:var(--muted)">TF-IDF BM25</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 2: Advanced + Graph + Agentic -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:32px">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+          <span style="background:#a855f722;color:#a855f7;border:1px solid #a855f7;border-radius:999px;font-size:17px;font-weight:700;padding:2px 10px">3</span>
           <span style="font-size:13px;font-weight:700">Advanced RAG</span>
         </div>
         <p style="font-size:14px;color:var(--muted);line-height:1.75;margin:0 0 12px">
@@ -107,13 +128,25 @@
           <span style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:3px 10px;font-size:17px;color:var(--muted)">RRF</span>
         </div>
       </div>
-    </div>
 
-    <!-- Row 2: Agentic + Hybrid + Graph -->
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:32px">
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-          <span style="background:#ef444422;color:#ef4444;border:1px solid #ef4444;border-radius:999px;font-size:17px;font-weight:700;padding:2px 10px">3</span>
+          <span style="background:#f59e0b22;color:#f59e0b;border:1px solid #f59e0b;border-radius:999px;font-size:17px;font-weight:700;padding:2px 10px">4</span>
+          <span style="font-size:13px;font-weight:700">Graph RAG</span>
+        </div>
+        <p style="font-size:14px;color:var(--muted);line-height:1.75;margin:0 0 12px">
+          Documents are stored as a sequential knowledge graph. Retrieval starts with vector-matched seeds, then expands via BFS to pull in neighbouring chunks — ideal when answers depend on <em>surrounding context</em>.
+        </p>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          <span style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:3px 10px;font-size:17px;color:var(--muted)">graph nodes</span>
+          <span style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:3px 10px;font-size:17px;color:var(--muted)">BFS expansion</span>
+          <span style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:3px 10px;font-size:17px;color:var(--muted)">NetworkX</span>
+        </div>
+      </div>
+
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+          <span style="background:#ef444422;color:#ef4444;border:1px solid #ef4444;border-radius:999px;font-size:17px;font-weight:700;padding:2px 10px">5</span>
           <span style="font-size:13px;font-weight:700">Agentic RAG</span>
         </div>
         <p style="font-size:14px;color:var(--muted);line-height:1.75;margin:0 0 12px">
@@ -124,39 +157,6 @@
           <span style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:3px 10px;font-size:17px;color:var(--muted)">tool calling</span>
           <span style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:3px 10px;font-size:17px;color:var(--muted)">agent loop</span>
           <span style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:3px 10px;font-size:17px;color:var(--muted)">multi-hop</span>
-        </div>
-      </div>
-
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-          <span style="background:#22c55e22;color:#22c55e;border:1px solid #22c55e;border-radius:999px;font-size:17px;font-weight:700;padding:2px 10px">4</span>
-          <span style="font-size:13px;font-weight:700">Hybrid RAG</span>
-        </div>
-        <p style="font-size:14px;color:var(--muted);line-height:1.75;margin:0 0 12px">
-          Two searches run in parallel:<br><br>
-          <strong style="color:#3b82f6">Dense search</strong> — finds chunks by meaning (semantic/embeddings)<br>
-          <strong style="color:#f59e0b">Sparse search</strong> — finds chunks by exact keywords (BM25)<br><br>
-          Both results are merged using <strong style="color:var(--text)">RRF</strong>.
-        </p>
-        <div style="display:flex;flex-wrap:wrap;gap:6px">
-          <span style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:3px 10px;font-size:17px;color:var(--muted)">dense + sparse</span>
-          <span style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:3px 10px;font-size:17px;color:var(--muted)">RRF fusion</span>
-          <span style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:3px 10px;font-size:17px;color:var(--muted)">TF-IDF BM25</span>
-        </div>
-      </div>
-
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-          <span style="background:#f59e0b22;color:#f59e0b;border:1px solid #f59e0b;border-radius:999px;font-size:17px;font-weight:700;padding:2px 10px">5</span>
-          <span style="font-size:13px;font-weight:700">Graph RAG</span>
-        </div>
-        <p style="font-size:14px;color:var(--muted);line-height:1.75;margin:0 0 12px">
-          Documents are stored as a sequential knowledge graph. Retrieval starts with vector-matched seeds, then expands via BFS to pull in neighbouring chunks — ideal when answers depend on <em>surrounding context</em>.
-        </p>
-        <div style="display:flex;flex-wrap:wrap;gap:6px">
-          <span style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:3px 10px;font-size:17px;color:var(--muted)">graph nodes</span>
-          <span style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:3px 10px;font-size:17px;color:var(--muted)">BFS expansion</span>
-          <span style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:3px 10px;font-size:17px;color:var(--muted)">NetworkX</span>
         </div>
       </div>
     </div>
@@ -177,13 +177,13 @@
         <div style="padding:10px 14px;border-top:1px solid var(--border);font-size:13px;color:var(--green);border-left:1px solid var(--border)">Vector DB + BM25 ✅</div>
         <div style="padding:10px 14px;border-top:1px solid var(--border);font-size:13px;color:var(--muted);border-left:1px solid var(--border)">Best retrieval recall in practice for mixed queries</div>
 
-        <div style="padding:10px 14px;border-top:1px solid var(--border);font-weight:600;font-size:13px;color:#ef4444">Agentic</div>
-        <div style="padding:10px 14px;border-top:1px solid var(--border);font-size:13px;color:var(--amber);border-left:1px solid var(--border)">Vector DB optional ⚠️</div>
-        <div style="padding:10px 14px;border-top:1px solid var(--border);font-size:13px;color:var(--muted);border-left:1px solid var(--border)">Tool-agnostic — uses whatever retrieval makes sense per iteration</div>
-
         <div style="padding:10px 14px;border-top:1px solid var(--border);font-weight:600;font-size:13px;color:#f59e0b">Graph RAG</div>
         <div style="padding:10px 14px;border-top:1px solid var(--border);font-size:13px;color:var(--muted);border-left:1px solid var(--border)">Graph DB + Vector ❌</div>
         <div style="padding:10px 14px;border-top:1px solid var(--border);font-size:13px;color:var(--muted);border-left:1px solid var(--border)">This app uses sequential graph via NetworkX; full Graph RAG uses Neo4j etc.</div>
+
+        <div style="padding:10px 14px;border-top:1px solid var(--border);font-weight:600;font-size:13px;color:#ef4444">Agentic</div>
+        <div style="padding:10px 14px;border-top:1px solid var(--border);font-size:13px;color:var(--amber);border-left:1px solid var(--border)">Vector DB optional ⚠️</div>
+        <div style="padding:10px 14px;border-top:1px solid var(--border);font-size:13px;color:var(--muted);border-left:1px solid var(--border)">Tool-agnostic — uses whatever retrieval makes sense per iteration</div>
       </div>
     </div>
 

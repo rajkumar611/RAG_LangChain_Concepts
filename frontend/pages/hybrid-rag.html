@@ -3,7 +3,7 @@
 
     <!-- Header -->
     <div style="display:flex;align-items:center;gap:16px;margin-bottom:10px">
-      <span style="background:#1e3a5f;color:var(--blue);font-size:20px;font-weight:700;padding:4px 12px;border-radius:999px;letter-spacing:.05em">STRATEGY 4 OF 5</span>
+      <span style="background:#1e3a5f;color:var(--blue);font-size:20px;font-weight:700;padding:4px 12px;border-radius:999px;letter-spacing:.05em">STRATEGY 2 OF 5</span>
       <span style="font-size:20px;font-weight:800;letter-spacing:-0.4px;color:var(--text)">Hybrid RAG</span>
       <span style="background:#14532d22;color:var(--green);border:1px solid var(--green);font-size:20px;font-weight:700;padding:4px 12px;border-radius:999px;letter-spacing:.05em">Practical Best</span>
     </div>
@@ -49,6 +49,162 @@
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
           <div style="font-size:13px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Step 4 — LLM Generation</div>
           <div style="font-size:14px;color:var(--muted);line-height:1.75">The top fused chunks are passed to the LLM. Each chunk carries a source badge (vector, BM25, or both) indicating which retrieval method found it — this transparency helps you understand why each piece of context was included.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Full Pipeline Walkthrough -->
+    <div style="margin-bottom:32px">
+      <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--blue);margin-bottom:12px">Full Pipeline — Step by Step</div>
+      <div style="display:grid;gap:10px">
+
+        <!-- Step 1 -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:13px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Step 1 — Document Ingestion</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.75;margin-bottom:10px">Each uploaded document is processed into two parallel indexes:</div>
+          <ul style="font-size:14px;color:var(--muted);line-height:1.8;padding-left:20px;margin:0 0 12px">
+            <li>Split into chunks</li>
+            <li>Each chunk is <strong style="color:var(--text)">embedded</strong> using an embedding model → stored in a Vector DB for semantic retrieval</li>
+            <li>Each chunk is also added to a <strong style="color:var(--text)">BM25 / TF-IDF keyword index</strong> → stored for lexical retrieval</li>
+          </ul>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:13px;font-family:monospace;color:var(--muted);line-height:1.9">
+            <span style="color:var(--blue);font-weight:700">Chunk 17:</span><br>
+            "Transformers use self-attention to model token relationships..."<br><br>
+            <span style="color:var(--green);font-weight:700">Embedding:</span> [0.12, -0.44, 0.91, ...]<br><br>
+            → Stored in Vector DB<br>
+            → Indexed in BM25 / TF-IDF matrix
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:13px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Step 2 — User Query Arrives</div>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:13px;font-family:monospace;color:var(--muted);margin-bottom:10px">
+            <span style="color:var(--blue);font-weight:700">Query:</span> "How does transformer attention work?"
+          </div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.75">The same embedding model converts the query to a vector. Then <strong style="color:var(--text)">both searches run in parallel</strong>:</div>
+          <ul style="font-size:14px;color:var(--muted);line-height:1.8;padding-left:20px;margin:8px 0 0">
+            <li><strong style="color:#3b82f6">Dense (vector) search</strong> — retrieves chunks semantically similar to the query</li>
+            <li><strong style="color:var(--amber)">BM25 / keyword search</strong> — retrieves chunks containing the exact query terms</li>
+          </ul>
+        </div>
+
+        <!-- Step 3 -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:13px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Step 3 — Two Independent Ranked Lists</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.75;margin-bottom:12px">Each retriever returns its own ranked list, completely independently:</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div>
+              <div style="font-size:13px;font-weight:700;color:#3b82f6;margin-bottom:6px">Vector Search Results</div>
+              <table style="width:100%;border-collapse:collapse;font-size:13px">
+                <thead><tr style="background:#1e3a5f"><th style="padding:6px 10px;text-align:left;color:var(--muted);font-weight:600">Rank</th><th style="padding:6px 10px;text-align:left;color:var(--muted);font-weight:600">Chunk</th></tr></thead>
+                <tbody>
+                  <tr style="border-top:1px solid var(--border)"><td style="padding:6px 10px;color:var(--muted)">1</td><td style="padding:6px 10px;color:var(--text)">Chunk A</td></tr>
+                  <tr style="border-top:1px solid var(--border)"><td style="padding:6px 10px;color:var(--muted)">2</td><td style="padding:6px 10px;color:var(--text)">Chunk B</td></tr>
+                  <tr style="border-top:1px solid var(--border)"><td style="padding:6px 10px;color:var(--muted)">3</td><td style="padding:6px 10px;color:var(--text)">Chunk C</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div>
+              <div style="font-size:13px;font-weight:700;color:var(--amber);margin-bottom:6px">BM25 Results</div>
+              <table style="width:100%;border-collapse:collapse;font-size:13px">
+                <thead><tr style="background:#1e3a5f"><th style="padding:6px 10px;text-align:left;color:var(--muted);font-weight:600">Rank</th><th style="padding:6px 10px;text-align:left;color:var(--muted);font-weight:600">Chunk</th></tr></thead>
+                <tbody>
+                  <tr style="border-top:1px solid var(--border)"><td style="padding:6px 10px;color:var(--muted)">1</td><td style="padding:6px 10px;color:var(--text)">Chunk C</td></tr>
+                  <tr style="border-top:1px solid var(--border)"><td style="padding:6px 10px;color:var(--muted)">2</td><td style="padding:6px 10px;color:var(--text)">Chunk D</td></tr>
+                  <tr style="border-top:1px solid var(--border)"><td style="padding:6px 10px;color:var(--muted)">3</td><td style="padding:6px 10px;color:var(--text)">Chunk A</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:13px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Step 4 — RRF Fusion</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.75;margin-bottom:12px">
+            RRF scores each chunk as <code style="background:var(--bg);padding:1px 6px;border-radius:4px;font-size:13px">1/(60+rank)</code> from each list, then sums across lists. Chunks that appear highly in <em>both</em> lists float to the top. <strong style="color:var(--text)">RRF does not operate on vectors — it only uses rank positions.</strong>
+          </div>
+          <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:6px">After RRF — Merged Ranking</div>
+          <table style="width:100%;border-collapse:collapse;font-size:13px">
+            <thead><tr style="background:#1e3a5f"><th style="padding:6px 10px;text-align:left;color:var(--muted);font-weight:600">Final Rank</th><th style="padding:6px 10px;text-align:left;color:var(--muted);font-weight:600">Chunk</th><th style="padding:6px 10px;text-align:left;color:var(--muted);font-weight:600">Why</th></tr></thead>
+            <tbody>
+              <tr style="border-top:1px solid var(--border)"><td style="padding:6px 10px;color:var(--muted)">1</td><td style="padding:6px 10px;color:var(--text)">Chunk C</td><td style="padding:6px 10px;color:var(--muted)">#3 in vector + #1 in BM25</td></tr>
+              <tr style="border-top:1px solid var(--border)"><td style="padding:6px 10px;color:var(--muted)">2</td><td style="padding:6px 10px;color:var(--text)">Chunk A</td><td style="padding:6px 10px;color:var(--muted)">#1 in vector + #3 in BM25</td></tr>
+              <tr style="border-top:1px solid var(--border)"><td style="padding:6px 10px;color:var(--muted)">3</td><td style="padding:6px 10px;color:var(--text)">Chunk D</td><td style="padding:6px 10px;color:var(--muted)">#2 in BM25 only</td></tr>
+              <tr style="border-top:1px solid var(--border)"><td style="padding:6px 10px;color:var(--muted)">4</td><td style="padding:6px 10px;color:var(--text)">Chunk B</td><td style="padding:6px 10px;color:var(--muted)">#2 in vector only</td></tr>
+            </tbody>
+          </table>
+          <div style="font-size:13px;color:var(--muted);margin-top:8px;font-style:italic">These become the candidate documents passed to the LLM (or to a reranker in Advanced RAG).</div>
+        </div>
+
+        <!-- Step 5 -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+          <div style="font-size:13px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Step 5 — Cross-Encoder Reranking</div>
+          <div style="font-size:12px;color:var(--muted);font-style:italic;margin-bottom:10px">Used in Advanced RAG — not in this Hybrid RAG implementation, but shown here so you understand the full evolution</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.75;margin-bottom:10px">
+            A Cross-Encoder takes the <strong style="color:var(--text)">user query paired with each candidate chunk</strong> and scores their relevance jointly. Unlike embeddings (which encode query and chunk independently), the Cross-Encoder reads both together — letting transformer attention compare their tokens directly.
+          </div>
+          <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px">Input — one pair per candidate chunk:</div>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:13px;font-family:monospace;color:var(--muted);line-height:1.9;margin-bottom:12px">
+            (Query, Chunk C)<br>
+            (Query, Chunk A)<br>
+            (Query, Chunk D)<br>
+            (Query, Chunk B)
+          </div>
+          <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px">Internal token format:</div>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:13px;font-family:monospace;color:var(--muted);line-height:1.9;margin-bottom:12px">
+            [CLS] How does transformer attention work? [SEP]<br>
+            Transformers use self-attention to model relationships... [SEP]
+          </div>
+          <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:6px">Output — learned relevance scores:</div>
+          <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:14px">
+            <thead><tr style="background:#1e3a5f"><th style="padding:6px 10px;text-align:left;color:var(--muted);font-weight:600">Pair</th><th style="padding:6px 10px;text-align:left;color:var(--muted);font-weight:600">Score</th></tr></thead>
+            <tbody>
+              <tr style="border-top:1px solid var(--border)"><td style="padding:6px 10px;color:var(--muted)">Query + Chunk C</td><td style="padding:6px 10px;color:var(--green);font-weight:700">0.97</td></tr>
+              <tr style="border-top:1px solid var(--border)"><td style="padding:6px 10px;color:var(--muted)">Query + Chunk A</td><td style="padding:6px 10px;color:var(--green)">0.82</td></tr>
+              <tr style="border-top:1px solid var(--border)"><td style="padding:6px 10px;color:var(--muted)">Query + Chunk D</td><td style="padding:6px 10px;color:var(--red)">0.31</td></tr>
+            </tbody>
+          </table>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div style="background:#1e3a5f33;border:1px solid #3b82f644;border-radius:8px;padding:12px 14px">
+              <div style="font-size:13px;font-weight:700;color:#3b82f6;margin-bottom:6px">Embedding Retrieval</div>
+              <ul style="font-size:13px;color:var(--muted);line-height:1.75;padding-left:16px;margin:0">
+                <li>Uses cosine / vector similarity</li>
+                <li>Query and chunk embedded independently</li>
+                <li>Fast but less precise</li>
+              </ul>
+            </div>
+            <div style="background:#14532d33;border:1px solid #22c55e44;border-radius:8px;padding:12px 14px">
+              <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:6px">Cross-Encoder</div>
+              <ul style="font-size:13px;color:var(--muted);line-height:1.75;padding-left:16px;margin:0">
+                <li>Query + chunk processed together</li>
+                <li>Transformer attention compares tokens directly</li>
+                <li>More accurate, but slower</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Final pipeline visual -->
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-top:10px">
+        <div style="font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px">Complete Pipeline</div>
+        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:0;font-size:13px;font-family:monospace;color:var(--muted);line-height:2">
+          <div><span style="color:var(--blue);font-weight:700">Documents</span> → Chunking → Embeddings → <span style="color:#3b82f6">Vector DB</span> + <span style="color:var(--amber)">BM25 Index</span></div>
+          <div style="margin-left:8px">↓</div>
+          <div><span style="color:var(--blue);font-weight:700">User Query</span> → Query Embedding</div>
+          <div style="margin-left:120px">↓</div>
+          <div style="margin-left:40px"><span style="color:#3b82f6">Vector Search</span> ──┐</div>
+          <div style="margin-left:155px">├──→ <span style="color:var(--green);font-weight:700">RRF Fusion</span> → Top candidate chunks</div>
+          <div style="margin-left:40px"><span style="color:var(--amber)">BM25 Search</span> ────┘</div>
+          <div style="margin-left:220px">↓</div>
+          <div style="margin-left:120px"><span style="color:var(--purple)">Cross-Encoder Reranker</span> <span style="color:var(--muted);font-size:12px">(Advanced RAG)</span></div>
+          <div style="margin-left:220px">↓</div>
+          <div style="margin-left:140px">Best chunks selected</div>
+          <div style="margin-left:220px">↓</div>
+          <div style="margin-left:185px"><span style="color:var(--green);font-weight:700">LLM</span></div>
         </div>
       </div>
     </div>
