@@ -283,6 +283,73 @@
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
           <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">This App's Implementation <span style="font-size:11px;font-weight:600;color:var(--amber);background:#78350f22;padding:2px 8px;border-radius:999px;margin-left:6px">Simplified Sequential Graph</span></div>
           <div style="font-size:14px;color:var(--muted);line-height:1.7">The Graph RAG endpoint in this app uses a simplified approach to demonstrate the graph traversal concept without requiring a graph database. Document chunks become nodes, and edges connect each chunk to its sequential neighbours (the chunk before and after it in the document). A seed retrieval via vector search finds the most relevant chunk, then <strong style="color:var(--text)">BFS (Breadth-First Search)</strong> expands to neighbouring chunks to collect surrounding context. This is built with <code style="background:var(--bg);padding:1px 6px;border-radius:4px;font-size:13px">networkx</code> in Python. In production, you would replace this with entity extraction → Neo4j/ArangoDB → relationship-aware traversal.</div>
+          <!-- Why no Graph DB -->
+          <div style="margin-top:14px;display:grid;gap:10px">
+
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px 16px">
+              <div style="font-size:12px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Why not a real Graph DB?</div>
+              <div style="font-size:13px;color:var(--muted);line-height:1.75;margin-bottom:8px">Two reasons: <strong style="color:var(--text)">infrastructure</strong> and <strong style="color:var(--text)">cost</strong>.</div>
+              <div style="font-size:13px;color:var(--muted);line-height:1.75;margin-bottom:6px">A real Graph DB (Neo4j, ArangoDB) requires a separately running database server — another process, connection pooling, authentication, schema design. This app has <strong style="color:var(--text)">zero external dependencies</strong> — no database, no auth, everything lives in Python memory and resets on restart. Adding Neo4j would mean: install Neo4j → run it as a service → manage connections → handle failures. That's a significant infrastructure commitment for a demo.</div>
+              <div style="font-size:13px;color:var(--muted);line-height:1.75;">Entity extraction also requires <strong style="color:var(--text)">LLM calls per chunk</strong> at ingestion time:</div>
+              <div style="margin:8px 0;padding:10px 14px;background:var(--surface);border-radius:6px;font-size:12px;color:var(--muted);font-family:monospace;line-height:1.8">
+                Every chunk → LLM call → "Extract entities and relationships" → write to Neo4j
+              </div>
+              <div style="font-size:13px;color:var(--muted);line-height:1.75;">For a 50-page document with 100 chunks → 100 LLM API calls just to index one document. Slow, expensive, and adds API key dependency to ingestion — not suitable for a lightweight demo.</div>
+            </div>
+
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px 16px">
+              <div style="font-size:12px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">What we use instead — networkx</div>
+              <div style="font-size:13px;color:var(--muted);line-height:1.75;margin-bottom:8px"><code style="background:var(--surface);padding:1px 6px;border-radius:4px">networkx</code> is a pure Python in-memory graph library. No server, no setup, no cost. The app sidesteps entity extraction entirely by deriving graph structure from <strong style="color:var(--text)">chunk order</strong>:</div>
+              <div style="margin:8px 0;padding:10px 14px;background:var(--surface);border-radius:6px;font-size:12px;color:var(--amber);font-family:monospace;">
+                Chunk 0 ── Chunk 1 ── Chunk 2 ── Chunk 3 ── Chunk 4
+              </div>
+              <div style="font-size:13px;color:var(--muted);line-height:1.75;">Each chunk is a node. Edges connect sequential neighbours. No LLM needed to build this — it's just array indexing. BFS then expands from the seed chunk to pull in neighbours.</div>
+            </div>
+
+            <!-- Trade-off table -->
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px 16px">
+              <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">The Honest Trade-off</div>
+              <table style="width:100%;border-collapse:collapse;font-size:12px">
+                <thead>
+                  <tr>
+                    <th style="text-align:left;padding:6px 10px;border-bottom:1px solid var(--border);color:var(--muted);font-weight:700"></th>
+                    <th style="text-align:left;padding:6px 10px;border-bottom:1px solid var(--border);color:var(--amber);font-weight:700">This App</th>
+                    <th style="text-align:left;padding:6px 10px;border-bottom:1px solid var(--border);color:var(--green);font-weight:700">Production Graph RAG</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td style="padding:6px 10px;color:var(--muted);border-bottom:1px solid var(--border)">Graph structure</td><td style="padding:6px 10px;color:var(--text);border-bottom:1px solid var(--border)">Chunk adjacency</td><td style="padding:6px 10px;color:var(--text);border-bottom:1px solid var(--border)">Entity relationships</td></tr>
+                  <tr><td style="padding:6px 10px;color:var(--muted);border-bottom:1px solid var(--border)">Graph DB</td><td style="padding:6px 10px;color:var(--text);border-bottom:1px solid var(--border)">networkx (in-memory)</td><td style="padding:6px 10px;color:var(--text);border-bottom:1px solid var(--border)">Neo4j / ArangoDB</td></tr>
+                  <tr><td style="padding:6px 10px;color:var(--muted);border-bottom:1px solid var(--border)">Build cost</td><td style="padding:6px 10px;color:var(--text);border-bottom:1px solid var(--border)">Zero (no LLM calls)</td><td style="padding:6px 10px;color:var(--text);border-bottom:1px solid var(--border)">High (LLM per chunk)</td></tr>
+                  <tr><td style="padding:6px 10px;color:var(--muted);border-bottom:1px solid var(--border)">Cross-document links</td><td style="padding:6px 10px;color:var(--text);border-bottom:1px solid var(--border)">No</td><td style="padding:6px 10px;color:var(--text);border-bottom:1px solid var(--border)">Yes</td></tr>
+                  <tr><td style="padding:6px 10px;color:var(--muted)">What BFS returns</td><td style="padding:6px 10px;color:var(--text)">Neighbouring chunks</td><td style="padding:6px 10px;color:var(--text)">Related entities across docs</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Seed retrieval explained -->
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px 16px">
+              <div style="font-size:12px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">What is "Seed Retrieval"?</div>
+              <div style="font-size:13px;color:var(--muted);line-height:1.75;margin-bottom:8px"><strong style="color:var(--text)">Seed retrieval</strong> is the first step — finding the starting point in the graph before any traversal begins. Think of being dropped into a city and needing to find a specific neighbourhood: before you can navigate the streets, you need to know which street to start on. Finding that starting street = seed retrieval.</div>
+              <div style="margin:8px 0;padding:10px 14px;background:var(--surface);border-radius:6px;font-size:12px;color:var(--muted);font-family:monospace;line-height:2">
+                User Query: "Which teams are affected by the vulnerability?"<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;▼<br>
+                &nbsp;&nbsp;&nbsp;Vector search (cosine similarity)<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;▼<br>
+                &nbsp;&nbsp;&nbsp;Returns the 2–3 most relevant chunks<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── These are the <span style="color:var(--green)">SEED nodes</span><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;▼<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BFS expands outward → pulls in neighbouring chunks
+              </div>
+              <div style="font-size:13px;color:var(--muted);line-height:1.75;margin-bottom:8px">Without seed retrieval, you'd have to traverse the entire graph from every node — computationally pointless. The seed narrows it down: <em style="color:var(--text)">"start traversal from here, not from everywhere."</em></div>
+              <div style="font-size:13px;color:var(--muted);line-height:1.75;">So the full flow is: <strong style="color:var(--text)">① Seed retrieval</strong> — vector search finds the entry point &nbsp;→&nbsp; <strong style="color:var(--text)">② Graph traversal</strong> — BFS expands outward &nbsp;→&nbsp; <strong style="color:var(--text)">③ Re-score</strong> — rank everything collected &nbsp;→&nbsp; <strong style="color:var(--text)">④ LLM</strong> — answer from combined context.</div>
+            </div>
+
+          </div>
         </div>
 
       </div>
