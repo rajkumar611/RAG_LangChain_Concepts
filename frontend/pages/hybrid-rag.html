@@ -8,7 +8,7 @@
       <span style="background:#14532d22;color:var(--green);border:1px solid var(--green);font-size:20px;font-weight:700;padding:4px 12px;border-radius:999px;letter-spacing:.05em">Vector + Keyword Fusion <span style="font-size:14px;font-weight:500;opacity:0.75">(Dense + Sparse Fusion)</span></span>
     </div>
     <p style="font-size:17px;color:var(--muted);line-height:1.8;margin-bottom:32px;">
-      Combines the strengths of two fundamentally different retrieval methods — dense vector search for semantic understanding and sparse BM25 for exact keyword matching — then fuses their rankings with Reciprocal Rank Fusion.
+      Combines the strengths of two fundamentally different retrieval methods — dense vector search for semantic understanding and sparse BM25 (It's a smart keyword search algorithm) for exact keyword matching — then fuses their rankings with Reciprocal Rank Fusion.
     </p>
 
     <!-- Pipeline -->
@@ -42,9 +42,28 @@
           <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:13px;font-family:monospace;color:var(--muted);line-height:1.9;margin-top:12px">
             <span style="color:var(--blue);font-weight:700">Chunk 17:</span> "Transformers use self-attention to model token relationships..."<br><br>
             <span style="color:var(--blue);font-weight:700">Dense index:</span> [0.12, -0.44, 0.91, ...]<br>
-            → Stored in Vector DB (cosine similarity search)<br><br>
+            → Stored in NumPy array (brute-force cosine similarity, no Vector DB)<br><br>
             <span style="color:var(--amber);font-weight:700">Sparse index:</span> {transformers: 0.8, self-attention: 0.9, token: 0.6}<br>
             → Stored in BM25 / TF-IDF matrix (keyword lookup)
+          </div>
+
+          <!-- TF-IDF explanation -->
+          <div style="margin-top:14px;display:grid;gap:8px">
+            <div style="font-size:13px;color:var(--muted);line-height:1.7"><strong style="color:var(--text)">TF-IDF</strong> stands for <strong style="color:var(--text)">Term Frequency – Inverse Document Frequency</strong>. It's a score that answers: <em>"how important is this word to this specific chunk?"</em></div>
+            <div style="display:grid;gap:6px">
+              <div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px 12px">
+                <div style="font-size:12px;font-weight:700;color:var(--blue);margin-bottom:3px">TF — Term Frequency</div>
+                <div style="font-size:13px;color:var(--muted);line-height:1.6">How often a word appears in a chunk. If "transformer" appears 4 times in a chunk, its TF is high for that chunk.</div>
+              </div>
+              <div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px 12px">
+                <div style="font-size:12px;font-weight:700;color:var(--amber);margin-bottom:3px">IDF — Inverse Document Frequency</div>
+                <div style="font-size:13px;color:var(--muted);line-height:1.6">How rare a word is across <em>all</em> chunks. Common words like "the", "is", "and" appear everywhere → low IDF (penalised). Rare words like "BERT" or "softmax" appear in few chunks → high IDF (rewarded).</div>
+              </div>
+              <div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px 12px">
+                <div style="font-size:12px;font-weight:700;color:var(--green);margin-bottom:3px">TF-IDF score = TF × IDF</div>
+                <div style="font-size:13px;color:var(--muted);line-height:1.6">A word scores high only if it appears <em>frequently in that chunk</em> and <em>rarely across all chunks</em>. That combination signals the word is genuinely characteristic of that chunk.</div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -99,7 +118,26 @@
         <!-- Step 4 -->
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
           <div style="font-size:13px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Step 4 — LLM Generation</div>
-          <div style="font-size:14px;color:var(--muted);line-height:1.75">The top fused chunks are passed to the LLM. Each chunk carries a source badge (vector, BM25, or both) indicating which retrieval method found it — this transparency helps you understand why each piece of context was included.</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.75;margin-bottom:12px">The top fused chunks, the user's query, and a brief answer instruction are combined into a single prompt and sent to the LLM. Here is exactly what that prompt looks like:</div>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:13px;font-family:monospace;color:var(--muted);line-height:1.9">
+            <span style="color:var(--blue);font-weight:700">Context:</span><br>
+            [1] chunk text (top fused result)...<br>
+            [2] chunk text...<br>
+            [3] chunk text...<br><br>
+            <span style="color:var(--amber);font-weight:700">Question:</span> {user's query}<br><br>
+            <span style="color:var(--green);font-weight:700">Answer in 2-3 sentences:</span>
+          </div>
+          <div style="margin-top:12px;display:grid;gap:6px">
+            <div style="font-size:13px;color:var(--muted);line-height:1.6">
+              <span style="color:var(--blue);font-weight:600">Context</span> — the numbered chunk texts only. Scores and source badges (vector / BM25 / both) are displayed in the UI for transparency but are <em>not</em> sent to the LLM.
+            </div>
+            <div style="font-size:13px;color:var(--muted);line-height:1.6">
+              <span style="color:var(--amber);font-weight:600">Question</span> — the user's raw query, appended after the context so the LLM knows what to answer.
+            </div>
+            <div style="font-size:13px;color:var(--muted);line-height:1.6">
+              <span style="color:var(--green);font-weight:600">Answer instruction</span> — a brief inline instruction ("Answer in 2-3 sentences:") that shapes the response length. There is no separate system prompt — this instruction is embedded directly in the user message.
+            </div>
+          </div>
         </div>
 
       </div>
@@ -120,13 +158,13 @@
           <tbody>
             <tr style="border:1px solid var(--border)">
               <td style="padding:9px 14px;color:var(--text);font-weight:600;border:1px solid var(--border)">Index</td>
-              <td style="padding:9px 14px;color:var(--muted);border:1px solid var(--border)">Vector DB only</td>
-              <td style="padding:9px 14px;color:var(--green);border:1px solid var(--border)">Vector DB + BM25 keyword index</td>
+              <td style="padding:9px 14px;color:var(--muted);border:1px solid var(--border)">NumPy array only<br><span style="font-size:12px;color:var(--muted);font-weight:400">No Vector DB (Pinecone, Chroma, FAISS) — embeddings are stored as a plain in-memory NumPy array and searched with a brute-force dot product.</span></td>
+              <td style="padding:9px 14px;color:var(--green);border:1px solid var(--border)">NumPy array + scikit-learn TF-IDF matrix<br><span style="font-size:12px;color:var(--muted);font-weight:400">Same NumPy approach for dense search; scikit-learn TfidfVectorizer for sparse. No external Vector DB is used in either path.</span></td>
             </tr>
             <tr style="background:var(--surface);border:1px solid var(--border)">
               <td style="padding:9px 14px;color:var(--text);font-weight:600;border:1px solid var(--border)">Retrieval</td>
               <td style="padding:9px 14px;color:var(--muted);border:1px solid var(--border)">Single vector search</td>
-              <td style="padding:9px 14px;color:var(--green);border:1px solid var(--border)">Parallel vector + BM25 keyword</td>
+              <td style="padding:9px 14px;color:var(--green);border:1px solid var(--border)">Parallel vector + BM25 keyword<br><span style="font-size:12px;color:var(--muted);font-weight:400">Parallel vector means the vector search runs at the same time as BM25 keyword search, and both result lists are later fused using RRF.</span></td>
             </tr>
             <tr style="border:1px solid var(--border)">
               <td style="padding:9px 14px;color:var(--text);font-weight:600;border:1px solid var(--border)">Fusion</td>
@@ -135,7 +173,7 @@
             </tr>
             <tr style="background:var(--surface);border:1px solid var(--border)">
               <td style="padding:9px 14px;color:var(--text);font-weight:600;border:1px solid var(--border)">Exact-match queries</td>
-              <td style="padding:9px 14px;color:var(--red);border:1px solid var(--border)">Often fails — vector space misses specific terms</td>
+              <td style="padding:9px 14px;color:var(--red);border:1px solid var(--border)">Often fails — vector space misses specific terms<br><span style="font-size:12px;color:var(--muted);font-weight:400">Embeddings map words by meaning, not exact spelling. Rare or arbitrary strings like product codes (P/N-4821B), names (John Wickramasinghe), or IDs (RFC 7231) may not land close to the matching chunk in vector space — even if the chunk contains that exact term.</span></td>
               <td style="padding:9px 14px;color:var(--green);border:1px solid var(--border)">Handled by the BM25 keyword path</td>
             </tr>
           </tbody>
@@ -193,7 +231,7 @@
           <div style="font-size:14px;color:var(--muted);line-height:1.7">Uses embeddings to find chunks that are semantically similar to the query, even if they use different words. This app uses <code style="background:var(--bg);padding:1px 6px;border-radius:4px;font-size:13px">all-MiniLM-L6-v2</code> and a NumPy dot product — the same embedding model used across all RAG strategies.</div>
         </div>
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
-          <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">Sparse Retrieval <span style="font-size:17px;font-weight:600;color:var(--amber);background:#78350f22;padding:2px 8px;border-radius:999px;margin-left:6px">TF-IDF BM25 · keyword</span></div>
+          <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">Sparse Retrieval <span style="font-size:17px;font-weight:600;color:var(--amber);background:#78350f22;padding:2px 8px;border-radius:999px;margin-left:6px">TF-IDF BM25 (It's a smart keyword search algorithm) · keyword</span></div>
           <div style="font-size:14px;color:var(--muted);line-height:1.7">Uses term frequency and inverse document frequency to score chunks that contain the exact words from the query. Excellent for technical terms, proper names, codes, or any string where the exact wording matters. This app uses scikit-learn's <code style="background:var(--bg);padding:1px 6px;border-radius:4px;font-size:13px">TfidfVectorizer</code>.</div>
         </div>
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
