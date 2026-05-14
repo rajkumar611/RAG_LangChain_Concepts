@@ -123,6 +123,7 @@
                 → <span style="color:#3b82f6">[0.21, -0.88, 0.77, ...]</span><br>
                 → stored in Pinecone / Milvus / NumPy
               </div>
+              <div style="font-size:11px;color:var(--muted);margin-top:8px;line-height:1.6;border-top:1px solid #3b82f633;padding-top:6px"><strong style="color:var(--text)">Vector Index (Dense)</strong> is the data structure concept — a searchable store of embedding vectors. A <strong style="color:var(--text)">Vector DB</strong> (Pinecone, Chroma, FAISS, Milvus) is a production database product that hosts this index with persistence, scalability, and fast ANN search. Same idea, different abstraction level. In this app the index is a plain NumPy array in memory.</div>
             </div>
             <div style="background:#78350f22;border:1px solid #f59e0b44;border-radius:8px;padding:12px 14px">
               <div style="font-size:13px;font-weight:700;color:var(--amber);margin-bottom:8px">Keyword Index (Sparse)</div>
@@ -135,6 +136,27 @@
             </div>
           </div>
           <div style="font-size:13px;color:var(--muted)">At query time, metadata enables <strong style="color:var(--text)">pre-filtering</strong> (only search chunks from a specific year or section), <strong style="color:var(--text)">ranking boosts</strong> (prefer recent sources), and <strong style="color:var(--text)">traceability</strong> — every answer can be traced to an exact source and section.</div>
+
+          <!-- Multi-vector indexing note -->
+          <div style="margin-top:14px;background:var(--bg);border:1px solid #a855f744;border-radius:8px;padding:12px 14px">
+            <div style="font-size:12px;font-weight:700;color:var(--purple);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">Optional Extension — Multi-Vector Indexing</div>
+            <div style="font-size:13px;color:var(--muted);line-height:1.75;margin-bottom:10px">The intro at the top of this page mentions <em>multi-vector indexing</em>. This is an optional extension to dual storage: instead of one dense embedding per chunk, store <strong style="color:var(--text)">multiple embeddings</strong> — each capturing a different representation of the same chunk. A query can match on any of them, improving retrieval coverage for questions that come at the content from different angles.</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">
+              <div style="background:var(--surface);border-radius:6px;padding:8px 10px">
+                <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">Content Embedding</div>
+                <div style="font-size:12px;color:var(--muted);line-height:1.6">Embeds the raw chunk text. Matches queries that ask directly about the content.</div>
+              </div>
+              <div style="background:var(--surface);border-radius:6px;padding:8px 10px">
+                <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">Summary Embedding</div>
+                <div style="font-size:12px;color:var(--muted);line-height:1.6">Embeds an LLM-generated summary of the chunk. Matches broad or thematic queries that wouldn't align with raw text.</div>
+              </div>
+              <div style="background:var(--surface);border-radius:6px;padding:8px 10px">
+                <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">Question Embedding</div>
+                <div style="font-size:12px;color:var(--muted);line-height:1.6">Embeds hypothetical questions this chunk could answer (ColBERT-style). Directly matches question-shaped queries.</div>
+              </div>
+            </div>
+            <div style="font-size:12px;color:var(--muted);line-height:1.6">All three embeddings point back to the same chunk. This app stores one dense embedding per chunk — multi-vector indexing is how production systems extend this when a single embedding doesn't cover enough query shapes.</div>
+          </div>
         </div>
 
         <!-- Step 3 -->
@@ -161,8 +183,21 @@
               </div>
             </div>
             <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px">
-              <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">Query Expansion &amp; Multi-Query</div>
-              <div style="font-size:13px;color:var(--muted);line-height:1.7">Generate multiple paraphrases or sub-questions from one input, run all of them through retrieval, then merge. Improves recall by covering more of the semantic space.</div>
+              <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px">Query Expansion &amp; Multi-Query</div>
+              <div style="font-size:13px;color:var(--muted);line-height:1.75;margin-bottom:10px">A single query only covers one angle. Different chunks in a document use different phrasing for the same idea — so one query will miss anything worded differently. The fix: generate multiple paraphrases and sub-questions from the original, run each through retrieval independently, then merge all results via RRF.</div>
+              <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">Example</div>
+              <div style="font-size:12px;font-family:monospace;color:var(--muted);background:var(--surface);border-radius:6px;padding:8px 12px;margin-bottom:10px;line-height:1.9"><span style="color:var(--blue);font-weight:700">Original:</span> "What are the side effects of ibuprofen?"</div>
+              <table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:10px">
+                <thead><tr style="background:#1e3a5f"><th style="padding:5px 10px;text-align:left;color:var(--muted);font-weight:600">Generated version</th><th style="padding:5px 10px;text-align:left;color:var(--muted);font-weight:600">Why it helps</th></tr></thead>
+                <tbody>
+                  <tr style="border-top:1px solid var(--border)"><td style="padding:5px 10px;color:var(--text)">"What are the side effects of ibuprofen?"</td><td style="padding:5px 10px;color:var(--muted)">original query</td></tr>
+                  <tr style="border-top:1px solid var(--border)"><td style="padding:5px 10px;color:var(--text)">"What are the risks of taking ibuprofen?"</td><td style="padding:5px 10px;color:var(--muted)">synonym — "risks" instead of "side effects"</td></tr>
+                  <tr style="border-top:1px solid var(--border)"><td style="padding:5px 10px;color:var(--text)">"Can ibuprofen cause stomach problems?"</td><td style="padding:5px 10px;color:var(--muted)">sub-question — targets one specific effect</td></tr>
+                  <tr style="border-top:1px solid var(--border)"><td style="padding:5px 10px;color:var(--text)">"Is ibuprofen safe for long-term use?"</td><td style="padding:5px 10px;color:var(--muted)">sub-question — different angle</td></tr>
+                  <tr style="border-top:1px solid var(--border)"><td style="padding:5px 10px;color:var(--text)">"ibuprofen adverse reactions"</td><td style="padding:5px 10px;color:var(--muted)">keyword phrasing — how a medical doc would word it</td></tr>
+                </tbody>
+              </table>
+              <div style="font-size:13px;color:var(--muted);line-height:1.75">Each version runs retrieval independently. A chunk saying <em>"adverse reactions include gastrointestinal bleeding"</em> scores low against "side effects" but high against "adverse reactions" or "stomach problems" — query expansion ensures it gets found regardless of phrasing.</div>
             </div>
           </div>
 
@@ -181,7 +216,17 @@
               <tr style="border-top:1px solid var(--border)"><td style="padding:6px 10px;color:var(--muted)">Query + Chunk B</td><td style="padding:6px 10px;color:var(--red)">0.18</td></tr>
             </tbody>
           </table>
-          <div style="font-size:13px;color:var(--muted)">Unlike the bi-encoder used during indexing (which encodes query and chunks independently), the cross-encoder reads both as a single input — letting transformer attention directly compare their tokens. Slower but far more accurate. Only the top-scored chunks (e.g. C and A) proceed to generation. Common models: Cohere Rerank, BGE Reranker, Jina Reranker. This app uses the LLM itself as a scoring approximation.</div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:12px">Unlike the bi-encoder used during indexing (which encodes query and chunks independently), the cross-encoder reads both as a single input — letting transformer attention directly compare their tokens. Slower but far more accurate. Only the top-scored chunks (e.g. C and A) proceed to generation.</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div style="background:#14532d22;border:1px solid #22c55e44;border-radius:8px;padding:10px 14px">
+              <div style="font-size:11px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">This App</div>
+              <div style="font-size:13px;color:var(--muted);line-height:1.75">Reranking is done by the <strong style="color:var(--text)">LLM (Claude)</strong>. Claude is prompted to score each candidate chunk for relevance against the query and return a ranked order. This is why the demo results show <strong style="color:var(--text)">"4. LLM Re-ranking"</strong> — no separate reranker model is needed, Claude already handles it.</div>
+            </div>
+            <div style="background:#1e3a5f33;border:1px solid #3b82f644;border-radius:8px;padding:10px 14px">
+              <div style="font-size:11px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">Real-World Production</div>
+              <div style="font-size:13px;color:var(--muted);line-height:1.75">Reranking is done by a dedicated <strong style="color:var(--text)">cross-encoder model</strong> — such as <strong style="color:var(--text)">Cohere Rerank</strong>, <strong style="color:var(--text)">BGE Reranker</strong>, or <strong style="color:var(--text)">Jina Reranker</strong>. These are small, purpose-built models that are faster and cheaper per call than an LLM, and purpose-trained specifically for relevance scoring.</div>
+            </div>
+          </div>
         </div>
 
         <!-- Step 4 -->

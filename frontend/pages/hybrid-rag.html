@@ -62,6 +62,9 @@
             <span style="color:var(--amber);font-weight:700">Sparse index:</span> {transformers: 0.8, self-attention: 0.9, token: 0.6}<br>
             → Stored in BM25 / TF-IDF matrix (keyword lookup)
           </div>
+          <div style="margin-top:10px;padding:10px 14px;background:#2d1515;border:1px solid #7f1d1d55;border-radius:8px;font-size:13px;color:var(--muted);line-height:1.75">
+            <strong style="color:var(--red)">No metadata stored.</strong> Like Naive RAG, chunks are stored as plain strings with no source filename, page number, or section heading attached. The only identifier a chunk has is its position in the list. Source traceability is introduced in Advanced RAG.
+          </div>
 
           <!-- TF-IDF explanation -->
           <div style="margin-top:14px;display:grid;gap:8px">
@@ -187,6 +190,11 @@
               <td style="padding:9px 14px;color:var(--muted);border:1px solid var(--border)">None — similarity score is final</td>
               <td style="padding:9px 14px;color:var(--green);border:1px solid var(--border)">RRF merges both ranked lists</td>
             </tr>
+            <tr style="border:1px solid var(--border)">
+              <td style="padding:9px 14px;color:var(--text);font-weight:600;border:1px solid var(--border)">Metadata</td>
+              <td style="padding:9px 14px;color:var(--muted);border:1px solid var(--border)">None stored</td>
+              <td style="padding:9px 14px;color:var(--muted);border:1px solid var(--border)">None stored — same as Naive RAG. No source filename, page number, or section heading is attached to any chunk.</td>
+            </tr>
             <tr style="background:var(--surface);border:1px solid var(--border)">
               <td style="padding:9px 14px;color:var(--text);font-weight:600;border:1px solid var(--border)">Exact-match queries</td>
               <td style="padding:9px 14px;color:var(--red);border:1px solid var(--border)">Often fails — vector space misses specific terms<br><span style="font-size:12px;color:var(--muted);font-weight:400">Embeddings map words by meaning, not exact spelling. Rare or arbitrary strings like product codes (P/N-4821B), names (John Wickramasinghe), or IDs (RFC 7231) may not land close to the matching chunk in vector space — even if the chunk contains that exact term.</span></td>
@@ -231,6 +239,7 @@
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px">
         <div style="font-size:13px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">Limitations</div>
         <ul style="font-size:14px;color:var(--muted);line-height:1.8;padding-left:16px;margin:0">
+          <li style="margin-bottom:5px">No metadata — retrieved chunks have no traceability to source, page, or section</li>
           <li style="margin-bottom:5px">Double the indexing overhead — two structures to build and maintain</li>
           <li style="margin-bottom:5px">Two query paths to keep in sync</li>
           <li>No post-retrieval reranking — the fused top-K reaches the LLM without a final quality evaluation</li>
