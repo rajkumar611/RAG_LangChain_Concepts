@@ -240,8 +240,11 @@ def _faithfulness_guardrail(answer: str, docs: list[dict], threshold: float | No
     prompt = (
         f"Given these source documents:\n{ctx}\n\n"
         f"And this answer: {answer}\n\n"
-        f"Rate how faithfully this answer is grounded in the documents "
-        f"(0.0 = contradicts or ignores documents, 1.0 = every claim directly supported). "
+        f"Rate how faithfully this answer is grounded in the documents using this exact scale:\n"
+        f"1.0 = every claim in the answer is directly supported by the documents\n"
+        f"0.5 = answer is partially supported by the documents\n"
+        f"0.0 = the answer EITHER contradicts the documents OR states it cannot answer / "
+        f"the documents do not contain relevant information for the question\n"
         f'Return JSON only: {{"faithfulness_score": <float between 0.0 and 1.0>}}'
     )
     try:

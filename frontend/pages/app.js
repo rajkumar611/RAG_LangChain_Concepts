@@ -280,11 +280,11 @@ function _renderGuardrail(elId, guardrail) {
   const color      = passed ? 'var(--green)' : 'var(--amber)';
   const borderClr  = passed ? '#14532d55'    : '#78350f55';
   const bg         = passed ? '#0a2e0a'      : '#2a1a00';
-  const label      = passed ? 'Grounded in document' : 'May contain LLM inference';
+  const label      = passed ? 'Grounded in document' : 'Not grounded in document';
   const dot        = passed ? '●' : '▲';
   const subtext    = passed
     ? `Faithfulness guardrail: ${pct}% — every claim verified against the retrieved context`
-    : `Faithfulness guardrail: ${pct}% — answer may include content not present in the uploaded document`;
+    : `Faithfulness guardrail: ${pct}% — document lacks relevant content or answer goes beyond the retrieved context`;
   const hitl = passed ? '' : `
     <div style="margin-top:8px;padding:8px 10px;background:#1a1000;border:1px solid #78350f33;border-radius:6px">
       <div style="font-size:11px;font-weight:700;color:var(--amber);margin-bottom:4px">What you can do</div>
@@ -2257,6 +2257,7 @@ async function runAdvancedRAG() {
   resultEl.style.display = 'block';
   answerEl.textContent = 'Running…';
   stepsEl.innerHTML = '';
+  document.getElementById('advanced-guardrail').innerHTML = '';
   try {
     const r = await fetch(`${BASE}/rag/advanced`, {
       method: 'POST', headers: {'Content-Type':'application/json'},
@@ -2313,6 +2314,7 @@ async function runNaiveRAG() {
   resultEl.style.display = 'block';
   answerEl.textContent = 'Running…';
   chunksEl.innerHTML = '';
+  document.getElementById('naive-guardrail').innerHTML = '';
   try {
     const r = await fetch(`${BASE}/rag/naive`, {
       method: 'POST', headers: {'Content-Type':'application/json'},
@@ -2355,6 +2357,7 @@ async function _sharedRun(queryId, resultId, answerId, stepsId, endpoint, guardr
   const answerEl = document.getElementById(answerId);
   resultEl.style.display='block'; answerEl.textContent='Running…';
   if (stepsId) document.getElementById(stepsId).innerHTML='';
+  if (guardrailId) document.getElementById(guardrailId).innerHTML='';
   try {
     const r = await fetch(`${BASE}${endpoint}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query})});
     const d = await r.json();
