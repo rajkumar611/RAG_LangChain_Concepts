@@ -27,6 +27,9 @@ class Settings(BaseSettings):
     max_chunk_chars: int = 400
     max_search_rounds: int = 2  # agentic RAG: max tool-call iterations
 
+    # ── Guardrails ────────────────────────────────────────────────────────────
+    faithfulness_threshold: float = 0.7  # below this the answer gets an amber warning
+
     # ── Server ────────────────────────────────────────────────────────────────
     port: int = 8080
     env: str = "development"  # set to "production" to disable reload

@@ -130,14 +130,17 @@ def reciprocal_rank_fusion(ranked_lists: list[list[dict]], k: int = 60) -> list[
     return [{"id": i, "text": DOCS[i], "score": round(scores[i], 6)} for i in order]
 
 
-def llm(prompt: str, max_tokens: int = 512) -> str:
+def llm(prompt: str, max_tokens: int = 512, system: str | None = None) -> str:
     """Send a single-turn prompt to Claude and return the text response."""
     try:
-        response = client.messages.create(
+        kwargs: dict = dict(
             model=CLAUDE,
             max_tokens=max_tokens,
             messages=[{"role": "user", "content": prompt}],
         )
+        if system:
+            kwargs["system"] = system
+        response = client.messages.create(**kwargs)
         return response.content[0].text.strip()
     except anthropic.APIError as e:
         logger.error("Anthropic API error: %s", e)
@@ -160,6 +163,101 @@ def ctx_prompt(docs: list[dict], question: str) -> str:
     """Build a RAG prompt from retrieved docs and the user question."""
     ctx = "\n".join(f"[{i + 1}] {d['text']}" for i, d in enumerate(docs))
     return f"Context:\n{ctx}\n\nQuestion: {question}\n\nAnswer in 2-3 sentences:"
+
+
+# System prompt applied to every RAG answer generation call.
+# Instructs the model to stay within the retrieved context and acknowledge gaps
+# rather than filling them with training knowledge.
+RAG_SYSTEM = (
+    "You are a precise question-answering assistant. "
+    "Answer ONLY using the information provided in the context. "
+    "If the context does not contain enough information to answer the question, "
+    "say so clearly — do not use outside knowledge to fill the gap."
+)
+
+
+# Human-readable descriptions of the injection patterns enforced by _INJECTION_RE.
+# Exported so the /governance endpoint can report them without exposing raw regex.
+INJECTION_PATTERN_DESCRIPTIONS: list[str] = [
+    "ignore [all] [previous|prior|above|system] instructions",
+    "forget [all|your] instructions",
+    "disregard [all] [previous|prior] [instructions|prompt]",
+    "you are now a/an ...",
+    "dan prompt",
+    "jailbreak",
+    "evil mode",
+    "developer mode",
+]
+
+# Compiled once — detects instruction-override, role-hijack, and known jailbreak phrases
+_INJECTION_RE = re.compile(
+    r"ignore\s+(all\s+)?(previous|prior|above|system)\s+instructions?"
+    r"|forget\s+(all\s+|your\s+)instructions?"
+    r"|disregard\s+(all\s+)?(previous|prior)\s+(instructions?|prompt)"
+    r"|you\s+are\s+now\s+(?:a|an)\s+"
+    r"|\bdan\s+prompt\b|\bjailbreak\b|\bevil\s+mode\b|\bdeveloper\s+mode\b",
+    re.IGNORECASE,
+)
+
+
+def _check_prompt_injection(text: str) -> dict:
+    """Scan text for prompt injection patterns.
+
+    Returns {"flagged": bool, "reason": str | None}.
+    Checks instruction-override, role-hijack, and known jailbreak phrases.
+    """
+    match = _INJECTION_RE.search(text)
+    if match:
+        snippet = match.group().strip()[:50]
+        return {"flagged": True, "reason": f"Blocked: injection pattern detected ('{snippet}')."}
+    return {"flagged": False, "reason": None}
+
+
+def _check_indirect_injection(chunks: list[str]) -> dict:
+    """Scan document chunks for embedded injection patterns before indexing.
+
+    Returns {"flagged": bool, "reason": str | None}.
+    """
+    for i, chunk in enumerate(chunks):
+        result = _check_prompt_injection(chunk)
+        if result["flagged"]:
+            return {
+                "flagged": True,
+                "reason": f"Document blocked: injection pattern in chunk {i + 1}. {result['reason']}",
+            }
+    return {"flagged": False, "reason": None}
+
+
+def _faithfulness_guardrail(answer: str, docs: list[dict], threshold: float | None = None) -> dict:
+    """Inline faithfulness check: score whether the answer is grounded in retrieved context.
+
+    Calls the LLM with a JSON-scoring prompt. Falls back to 0.5 if parsing fails.
+    Threshold read from settings.faithfulness_threshold — below this a warning is attached.
+    """
+    if threshold is None:
+        threshold = settings.faithfulness_threshold
+    ctx = "\n".join(f"[{i + 1}] {d['text']}" for i, d in enumerate(docs))
+    prompt = (
+        f"Given these source documents:\n{ctx}\n\n"
+        f"And this answer: {answer}\n\n"
+        f"Rate how faithfully this answer is grounded in the documents "
+        f"(0.0 = contradicts or ignores documents, 1.0 = every claim directly supported). "
+        f'Return JSON only: {{"faithfulness_score": <float between 0.0 and 1.0>}}'
+    )
+    try:
+        raw = llm(prompt, max_tokens=64)
+        match = re.search(r"\{[^}]+\}", raw)
+        score = float(json.loads(match.group())["faithfulness_score"]) if match else 0.5
+        score = min(max(score, 0.0), 1.0)
+    except Exception:
+        score = 0.5
+
+    passed = score >= threshold
+    return {
+        "passed": passed,
+        "faithfulness_score": round(score, 3),
+        "warning": None if passed else "Answer may not be fully grounded in the retrieved context.",
+    }
 
 
 # ── Upload ────────────────────────────────────────────────────────────────────
@@ -189,6 +287,10 @@ async def upload_doc(files: list[UploadFile] = File(...)):
         if not chunks:
             return {"error": f"No readable text found in '{fname}'."}
 
+        indirect_check = _check_indirect_injection(chunks)
+        if indirect_check["flagged"]:
+            return JSONResponse(status_code=400, content={"detail": indirect_check["reason"]})
+
         all_chunks.extend(chunks)
         results.append({"filename": fname, "chunks": len(chunks)})
 
@@ -210,6 +312,10 @@ def naive_rag(q: QueryRequest):
     if not DOCS:
         return no_docs_response()
 
+    check = _check_prompt_injection(q.query)
+    if check["flagged"]:
+        return JSONResponse(status_code=400, content={"detail": check["reason"]})
+
     try:
         steps = [{"step": "1. Embed Query", "detail": f'Encode "{q.query}" → 384-dim vector'}]
         docs = vector_search(q.query, k=3)
@@ -222,9 +328,10 @@ def naive_rag(q: QueryRequest):
         steps.append(
             {"step": "3. Augment Prompt", "detail": "Prepend top-3 chunks to the user question"}
         )
-        ans = llm(ctx_prompt(docs, q.query))
+        ans = llm(ctx_prompt(docs, q.query), system=RAG_SYSTEM)
         steps.append({"step": "4. Generate", "detail": "LLM reads augmented prompt → answer"})
-        return {"answer": ans, "docs": docs, "steps": steps}
+        guardrail = _faithfulness_guardrail(ans, docs)
+        return {"answer": ans, "docs": docs, "steps": steps, "guardrail": guardrail}
     except RuntimeError as e:
         return JSONResponse(status_code=500, content={"detail": str(e)})
 
@@ -242,6 +349,10 @@ def advanced_rag(q: QueryRequest):
     """
     if not DOCS:
         return no_docs_response()
+
+    check = _check_prompt_injection(q.query)
+    if check["flagged"]:
+        return JSONResponse(status_code=400, content={"detail": check["reason"]})
 
     try:
         steps = []
@@ -284,11 +395,12 @@ def advanced_rag(q: QueryRequest):
         )
 
         docs = fused[:3]
-        ans = llm(ctx_prompt(docs, q.query))
+        ans = llm(ctx_prompt(docs, q.query), system=RAG_SYSTEM)
         steps.append(
             {"step": "5. Generate", "detail": "Answer from rewritten query + re-ranked context"}
         )
-        return {"answer": ans, "docs": docs, "steps": steps, "rewritten_query": rewritten}
+        guardrail = _faithfulness_guardrail(ans, docs)
+        return {"answer": ans, "docs": docs, "steps": steps, "rewritten_query": rewritten, "guardrail": guardrail}
     except RuntimeError as e:
         return JSONResponse(status_code=500, content={"detail": str(e)})
 
@@ -314,7 +426,8 @@ TOOLS = [
 AGENT_SYSTEM = (
     "You are a helpful assistant with access to a knowledge base search tool. "
     "Search 1-2 times to gather relevant context, then provide a clear, concise answer. "
-    "Do not search more than twice. After searching, always end with a final answer."
+    "Do not search more than twice. After searching, always end with a final answer. "
+    "Answer ONLY using the information retrieved — do not use outside knowledge to fill gaps."
 )
 
 
@@ -327,6 +440,10 @@ def agentic_rag(q: QueryRequest):
     """
     if not DOCS:
         return no_docs_response()
+
+    check = _check_prompt_injection(q.query)
+    if check["flagged"]:
+        return JSONResponse(status_code=400, content={"detail": check["reason"]})
 
     steps = [{"step": "0. Init Agent", "detail": f'Agent receives task: "{q.query}"'}]
     all_docs: list[dict] = []
@@ -410,7 +527,8 @@ def agentic_rag(q: QueryRequest):
             seen.add(doc["id"])
             unique.append(doc)
 
-    return {"answer": final_answer, "docs": unique[:5], "steps": steps}
+    guardrail = _faithfulness_guardrail(final_answer, unique[:5])
+    return {"answer": final_answer, "docs": unique[:5], "steps": steps, "guardrail": guardrail}
 
 
 # ════════════════════════════════════════════════════════════════════════════════
@@ -425,6 +543,10 @@ def hybrid_rag(q: QueryRequest):
     """
     if not DOCS:
         return no_docs_response()
+
+    check = _check_prompt_injection(q.query)
+    if check["flagged"]:
+        return JSONResponse(status_code=400, content={"detail": check["reason"]})
 
     try:
         steps = []
@@ -456,14 +578,16 @@ def hybrid_rag(q: QueryRequest):
                 ["bm25"] if doc["id"] in bm25_ids else []
             )
 
-        ans = llm(ctx_prompt(fused, q.query))
+        ans = llm(ctx_prompt(fused, q.query), system=RAG_SYSTEM)
         steps.append({"step": "4. Generate", "detail": "LLM answers from hybrid-fused top-3 docs"})
+        guardrail = _faithfulness_guardrail(ans, fused)
         return {
             "answer": ans,
             "docs": fused,
             "steps": steps,
             "vector_results": vector_results,
             "bm25_results": bm25_results,
+            "guardrail": guardrail,
         }
     except RuntimeError as e:
         return JSONResponse(status_code=500, content={"detail": str(e)})
@@ -482,6 +606,11 @@ def graph_rag(q: QueryRequest):
     """
     if not DOCS:
         return no_docs_response()
+
+    check = _check_prompt_injection(q.query)
+    if check["flagged"]:
+        return JSONResponse(status_code=400, content={"detail": check["reason"]})
+
     steps = []
 
     try:
@@ -527,16 +656,18 @@ def graph_rag(q: QueryRequest):
         sub_nodes = {f"d{d['id']}" for d in docs} | seed_nodes
         edges = [[n, nb] for n in sub_nodes for nb in G.neighbors(n) if nb in visited]
 
-        ans = llm(ctx_prompt(docs, q.query))
+        ans = llm(ctx_prompt(docs, q.query), system=RAG_SYSTEM)
         steps.append(
             {"step": "4. Generate", "detail": "Answer enriched via multi-hop graph traversal"}
         )
+        guardrail = _faithfulness_guardrail(ans, docs)
         return {
             "answer": ans,
             "docs": docs,
             "steps": steps,
             "graph_edges": edges[:20],
             "visited_nodes": list(visited),
+            "guardrail": guardrail,
         }
     except RuntimeError as e:
         return JSONResponse(status_code=500, content={"detail": str(e)})

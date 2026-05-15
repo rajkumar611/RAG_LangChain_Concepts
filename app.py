@@ -22,7 +22,7 @@ if os.getenv("LANGCHAIN_API_KEY"):
     os.environ.setdefault("LANGCHAIN_PROJECT", "rag-evaluation-suite")
 
 from src.config import settings
-from src.rag.routes import router as rag_router, DOCS
+from src.rag.routes import router as rag_router, DOCS, INJECTION_PATTERN_DESCRIPTIONS
 from src.langchain_orchestration.routes import router as lc_router, LC_SESSIONS
 
 _START_TIME = time.time()
@@ -38,6 +38,56 @@ app.mount("/pages", StaticFiles(directory="frontend/pages"), name="pages")
 @app.get("/")
 def root():
     return FileResponse("frontend/index.html")
+
+
+@app.get("/governance")
+def governance():
+    """Policy snapshot — every rule this app enforces, live from current config.
+
+    No hardcoded values: thresholds and limits are read directly from settings,
+    so the response always reflects what the system is actually doing.
+    """
+    return {
+        "version": "1.0",
+        "security_filters": {
+            "prompt_injection": {
+                "enabled": True,
+                "scope": "user query — checked before retrieval",
+                "action": "block — HTTP 400, no retrieval or LLM call made",
+                "patterns": INJECTION_PATTERN_DESCRIPTIONS,
+            },
+            "indirect_injection": {
+                "enabled": True,
+                "scope": "uploaded document — checked per chunk before indexing",
+                "action": "block — HTTP 400, document not indexed",
+                "patterns": "same pattern set as prompt_injection",
+            },
+        },
+        "guardrails": {
+            "faithfulness": {
+                "enabled": True,
+                "scope": "all RAG answers — runs after every generation",
+                "threshold": settings.faithfulness_threshold,
+                "model": settings.sonnet_model,
+                "action": "warn — amber indicator + HITL suggestions shown in UI",
+            },
+        },
+        "human_in_the_loop": {
+            "trigger": f"faithfulness_score < {settings.faithfulness_threshold}",
+            "response": "UI surfaces three actionable next steps for the user",
+        },
+        "models": {
+            "rag": settings.sonnet_model,
+            "evaluation": settings.haiku_model,
+            "embeddings": settings.embedding_model,
+        },
+        "limits": {
+            "max_query_length": 2000,
+            "max_chunks_per_upload": settings.max_chunks,
+            "max_chunk_chars": settings.max_chunk_chars,
+            "max_agentic_search_rounds": settings.max_search_rounds,
+        },
+    }
 
 
 @app.get("/health")

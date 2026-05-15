@@ -1,0 +1,23 @@
+<div style="flex:1;overflow-y:auto;width:100%">
+  <div style="padding:40px 48px 56px;width:100%;box-sizing:border-box">
+
+    <!-- Header -->
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:10px">
+      <span style="background:#1e3a5f;color:var(--blue);font-size:20px;font-weight:700;padding:4px 12px;border-radius:999px;letter-spacing:.05em">POLICY</span>
+      <span style="font-size:20px;font-weight:800;letter-spacing:-0.4px;color:var(--text)">Governance</span>
+    </div>
+    <p style="font-size:14px;color:var(--muted);line-height:1.8;margin-bottom:32px;max-width:680px">
+      Every rule this app enforces — live from current configuration. Values are read directly from
+      <code style="background:var(--surface);padding:1px 6px;border-radius:4px;font-size:13px">.env</code>
+      at startup, so this page always reflects what the system is actually doing. Change a value in
+      <code style="background:var(--surface);padding:1px 6px;border-radius:4px;font-size:13px">.env</code>,
+      restart, and both the behaviour and this page update together.
+    </p>
+
+    <!-- Policy content — populated by loadGovernance() in app.js -->
+    <div id="gov-content">
+      <div style="color:var(--muted);font-size:13px;padding:20px 0">Loading policy…</div>
+    </div>
+
+  </div>
+</div>

@@ -91,7 +91,68 @@ async function runEval() {
   }
 }
 
-function showLangchain() { navigate('langchain', 'toc-langchain'); }
+function showGovernance() { navigate('governance', 'toc-governance').then(loadGovernance); }
+function showLangchain()  { navigate('langchain', 'toc-langchain'); }
+
+async function loadGovernance() {
+  const el = document.getElementById('gov-content');
+  if (!el) return;
+  el.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:20px 0">Loading policy…</div>';
+  try {
+    const data = await fetch(`${BASE}/governance`).then(r => r.json());
+    const scoreColor = s => s >= 0.8 ? 'var(--green)' : s >= 0.5 ? 'var(--amber)' : 'var(--red)';
+
+    function policyCard(title, color, rows) {
+      const rowHtml = rows.map(([k, v]) => `
+        <div style="display:flex;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px">
+          <div style="min-width:180px;color:var(--muted);flex-shrink:0">${k}</div>
+          <div style="color:var(--text);word-break:break-word">${v}</div>
+        </div>`).join('');
+      return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:16px">
+        <div style="font-size:11px;font-weight:700;color:${color};text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">${title}</div>
+        ${rowHtml}
+      </div>`;
+    }
+
+    const sf = data.security_filters;
+    const grd = data.guardrails?.faithfulness ?? {};
+    const hitl = data.human_in_the_loop ?? {};
+    const mdl = data.models ?? {};
+    const lim = data.limits ?? {};
+    const patterns = (sf?.prompt_injection?.patterns ?? []).map(p => `<code style="background:var(--bg);padding:1px 6px;border-radius:4px;font-size:11px;margin-right:4px">${esc(p)}</code>`).join(' ');
+
+    el.innerHTML =
+      policyCard('Security Filters — Input Side', 'var(--red)', [
+        ['Prompt injection', `${sf.prompt_injection.enabled ? 'Enabled' : 'Disabled'} · ${sf.prompt_injection.action}`],
+        ['Detected patterns', `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px">${patterns}</div>`],
+        ['Indirect injection', `${sf.indirect_injection.enabled ? 'Enabled' : 'Disabled'} · ${sf.indirect_injection.action}`],
+        ['Scope', sf.indirect_injection.scope],
+      ]) +
+      policyCard('Guardrail — Output Side', 'var(--amber)', [
+        ['Faithfulness check', `${grd.enabled ? 'Enabled' : 'Disabled'} · runs on every RAG answer`],
+        ['Threshold', `<span style="color:${scoreColor(grd.threshold)};font-weight:700">${grd.threshold}</span> — below this triggers amber warning`],
+        ['Judge model', grd.model],
+        ['Action', grd.action],
+      ]) +
+      policyCard('Human in the Loop', 'var(--blue)', [
+        ['Trigger', esc(hitl.trigger ?? '')],
+        ['Response', esc(hitl.response ?? '')],
+      ]) +
+      policyCard('Models', 'var(--purple)', [
+        ['RAG answering', mdl.rag],
+        ['RAGAS evaluation', mdl.evaluation],
+        ['Embeddings', mdl.embeddings],
+      ]) +
+      policyCard('Limits', 'var(--muted)', [
+        ['Max query length', `${lim.max_query_length} characters`],
+        ['Max chunks per upload', lim.max_chunks_per_upload],
+        ['Max chars per chunk', lim.max_chunk_chars],
+        ['Max agentic search rounds', lim.max_agentic_search_rounds],
+      ]);
+  } catch (e) {
+    el.innerHTML = `<div style="color:var(--red);font-size:13px">Error loading policy: ${esc(e.message)}</div>`;
+  }
+}
 
 // ── Run query ──────────────────────────────────────────────────────────────
 async function runQuery(id, endpoint, showSources, showGraph) {
@@ -208,6 +269,40 @@ function esc(s) {
   return String(s)
     .replace(/&/g,"&amp;").replace(/</g,"&lt;")
     .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+function _renderGuardrail(elId, guardrail) {
+  const el = document.getElementById(elId);
+  if (!el || !guardrail) return;
+  const passed = guardrail.passed;
+  const score  = guardrail.faithfulness_score ?? 0;
+  const pct    = Math.round(score * 100);
+  const color      = passed ? 'var(--green)' : 'var(--amber)';
+  const borderClr  = passed ? '#14532d55'    : '#78350f55';
+  const bg         = passed ? '#0a2e0a'      : '#2a1a00';
+  const label      = passed ? 'Grounded in document' : 'May contain LLM inference';
+  const dot        = passed ? '●' : '▲';
+  const subtext    = passed
+    ? `Faithfulness guardrail: ${pct}% — every claim verified against the retrieved context`
+    : `Faithfulness guardrail: ${pct}% — answer may include content not present in the uploaded document`;
+  const hitl = passed ? '' : `
+    <div style="margin-top:8px;padding:8px 10px;background:#1a1000;border:1px solid #78350f33;border-radius:6px">
+      <div style="font-size:11px;font-weight:700;color:var(--amber);margin-bottom:4px">What you can do</div>
+      <ul style="margin:0;padding-left:14px;font-size:11px;color:var(--muted);line-height:1.8">
+        <li>Rephrase your query to be more specific to the document content</li>
+        <li>Upload a document that more directly addresses your question</li>
+        <li>Treat this answer as a starting point and verify the claims manually</li>
+      </ul>
+    </div>`;
+  el.innerHTML = `<div style="margin-top:10px;padding:10px 14px;background:${bg};border:1px solid ${borderClr};border-radius:8px">
+    <div style="display:flex;align-items:flex-start;gap:12px">
+      <span style="color:${color};font-size:16px;flex-shrink:0;line-height:1.2">${dot}</span>
+      <div style="flex:1">
+        <div style="font-size:12px;font-weight:700;color:${color}">${label}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px;line-height:1.5">${subtext}</div>
+      </div>
+    </div>${hitl}
+  </div>`;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -2169,6 +2264,7 @@ async function runAdvancedRAG() {
     });
     const d = await r.json();
     answerEl.textContent = d.answer || d.detail || JSON.stringify(d);
+    _renderGuardrail('advanced-guardrail', d.guardrail);
     if (d.steps && d.steps.length) {
       stepsEl.innerHTML = `<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Pipeline Steps</div>` +
         d.steps.map(s => `<div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:8px 12px;font-size:12px;color:var(--muted);margin-bottom:6px"><span style="color:var(--amber);font-weight:700">${s.step}</span>  ${s.detail}</div>`).join('');
@@ -2224,6 +2320,7 @@ async function runNaiveRAG() {
     });
     const d = await r.json();
     answerEl.textContent = d.answer || d.detail || JSON.stringify(d);
+    _renderGuardrail('naive-guardrail', d.guardrail);
     if (d.docs && d.docs.length) {
       chunksEl.innerHTML = `<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Retrieved Context Chunks (${d.docs.length})</div>` +
         d.docs.map((c, i) => `<div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:10px 12px;font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:6px"><span style="color:var(--blue);font-weight:700">Chunk ${i+1}</span><span style="color:var(--muted);font-size:11px;margin-left:8px">score: ${c.score ?? ''}</span><br>${c.text ?? c}</div>`).join('');
@@ -2252,7 +2349,7 @@ async function _sharedUpload(input, statusId) {
     } else { s.style.color='var(--red)'; s.textContent=d.detail||'Upload failed'; }
   } catch { s.style.color='var(--red)'; s.textContent='Upload error'; }
 }
-async function _sharedRun(queryId, resultId, answerId, stepsId, endpoint) {
+async function _sharedRun(queryId, resultId, answerId, stepsId, endpoint, guardrailId) {
   const query = document.getElementById(queryId).value.trim(); if (!query) return;
   const resultEl = document.getElementById(resultId);
   const answerEl = document.getElementById(answerId);
@@ -2262,6 +2359,7 @@ async function _sharedRun(queryId, resultId, answerId, stepsId, endpoint) {
     const r = await fetch(`${BASE}${endpoint}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query})});
     const d = await r.json();
     answerEl.textContent = d.answer||d.detail||JSON.stringify(d);
+    if (guardrailId) _renderGuardrail(guardrailId, d.guardrail);
     if (stepsId && d.steps?.length) {
       document.getElementById(stepsId).innerHTML = '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Pipeline Steps</div>' +
         d.steps.map(s=>`<div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:8px 12px;font-size:12px;color:var(--muted);margin-bottom:6px"><span style="color:var(--amber);font-weight:700">${s.step}</span>  ${s.detail}</div>`).join('');
@@ -2276,8 +2374,8 @@ async function _sharedRun(queryId, resultId, answerId, stepsId, endpoint) {
 function agenticUploadFile(i)  { _sharedUpload(i,'agentic-upload-status'); }
 function hybridUploadFile(i)   { _sharedUpload(i,'hybrid-upload-status'); }
 function graphUploadFile(i)    { _sharedUpload(i,'graph-upload-status'); }
-function runAgenticRAG()       { _sharedRun('agentic-query','agentic-result','agentic-answer','agentic-steps','/rag/agentic'); }
-function runHybridRAG()        { _sharedRun('hybrid-query','hybrid-result','hybrid-answer','hybrid-chunks','/rag/hybrid'); }
-function runGraphRAG()         { _sharedRun('graph-query','graph-result','graph-answer','graph-nodes','/rag/graph'); }
+function runAgenticRAG()       { _sharedRun('agentic-query','agentic-result','agentic-answer','agentic-steps','/rag/agentic','agentic-guardrail'); }
+function runHybridRAG()        { _sharedRun('hybrid-query','hybrid-result','hybrid-answer','hybrid-chunks','/rag/hybrid','hybrid-guardrail'); }
+function runGraphRAG()         { _sharedRun('graph-query','graph-result','graph-answer','graph-nodes','/rag/graph','graph-guardrail'); }
 
 document.addEventListener('DOMContentLoaded', () => navigate('home', 'toc-home'));

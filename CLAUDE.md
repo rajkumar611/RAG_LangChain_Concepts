@@ -26,7 +26,7 @@ docker compose up          # reads .env, sets ENV=production, healthchecks /heal
 ### Tests
 
 ```bash
-python -m pytest tests/ -v     # 69 tests, all LLM/RAGAS calls mocked, no API key needed
+python -m pytest tests/ -v     # 91 tests, all LLM/RAGAS calls mocked, no API key needed
 ```
 
 ## Architecture
@@ -44,8 +44,8 @@ frontend/
   index.html                            ← entire SPA (single file)
 tests/
   conftest.py                           ← shared fixtures: client, sample_text, uploaded_client
-  test_rag_utils.py                     ← 25 unit tests for chunking + retrieval utilities
-  test_rag_endpoints.py                 ← 44 endpoint integration tests (LLM + RAGAS mocked)
+  test_rag_utils.py                     ← 32 unit tests for chunking, retrieval, and injection detection
+  test_rag_endpoints.py                 ← 59 endpoint integration tests (LLM + RAGAS mocked)
 Dockerfile                              ← multi-stage build; pre-downloads embedding model
 docker-compose.yml                      ← local dev; healthcheck wired to /health
 pyproject.toml                          ← pytest, ruff, mypy config
@@ -95,6 +95,10 @@ Global in-memory state holds the uploaded document corpus — **reset on every s
 | `rebuild_indexes(docs)` | Rebuilds all globals from a new doc list |
 | `no_docs_response()` | Standard response when no document is uploaded |
 | `ctx_prompt(docs, question)` | Builds the RAG context+question prompt |
+| `RAG_SYSTEM` | System prompt passed to all RAG answer generation calls — instructs the model to stay within retrieved context and acknowledge gaps rather than using training knowledge |
+| `_check_prompt_injection(text)` | Regex scan for injection patterns in a query; returns `{"flagged", "reason"}` |
+| `_check_indirect_injection(chunks)` | Scans all document chunks for embedded injection before indexing; returns `{"flagged", "reason"}` |
+| `_faithfulness_guardrail(answer, docs, threshold)` | Inline faithfulness check after generation; scores grounding via LLM JSON prompt; threshold 0.7; returns `{"passed", "faithfulness_score", "warning"}` |
 | `_get_ragas_resources()` | Lazily initialises and caches RAGAS LLM + embeddings wrappers (called on first `/rag/evaluate` request) |
 
 **Request models**: `QueryRequest` (field: `query`), `EvaluationRequest` (fields: `question`, `answer`, `contexts`, `ground_truth`).
